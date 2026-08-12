@@ -23,7 +23,7 @@ Two stages, every time: break it under default (insecure) conditions, then break
 
 | Module | What it is |
 |---|---|
-| 🏠 [**Hub**](./ai-threat-hunt-hub.html) | Start here — links to everything below |
+| 🏠 [**Hub**](./index.html) | Start here — links to everything below |
 | 🧩 [**LLM Security**](./llm-security-battlefield.html) | 10 cases — prompt injection, data leakage, output handling, and more |
 | 🔑 [**NHI Security**](./nhi-security-battlefield.html) | 10 cases — service accounts, secrets, credential lifecycle |
 | 🤖 [**Agentic Security (ASI)**](./asi-security-battlefield.html) | 10 cases — goal hijacking, tool misuse, rogue agents |
@@ -33,12 +33,12 @@ Two stages, every time: break it under default (insecure) conditions, then break
 
 ## Running it
 
-No build step, no server, no dependencies. Clone or download the repo, keep all files in the same folder, and open `ai-threat-hunt-hub.html` in a browser.
+No build step, no server, no dependencies. Clone or download the repo, keep all files in the same folder, and open `index.html` in a browser.
 
 ```bash
 git clone https://github.com/<your-org>/ai-threat-hunt.git
 cd ai-threat-hunt
-open ai-threat-hunt-hub.html   # or just double-click it
+open index.html   # or just double-click it
 ```
 
 **One honest caveat:** progress tracking, hints, and checklist persistence use `window.storage`, an API provided by the Claude.ai artifact runtime. Outside that environment, every challenge, hint, and link still works identically — progress just won't survive a page reload. Swapping those calls for `localStorage` is a small, welcome contribution if you want a fully standalone build.
@@ -47,7 +47,7 @@ open ai-threat-hunt-hub.html   # or just double-click it
 
 ```
 ai-threat-hunt/
-├── ai-threat-hunt-hub.html          # entry point
+├── index.html          # entry point
 ├── field-manual.html                # methodology + working checklists
 ├── ai-security-convergence.html     # the converged 10-step scenario
 ├── llm-security-battlefield.html    # LLM01–LLM10
@@ -63,7 +63,7 @@ This project is a teaching layer built on top of real, ongoing community researc
 
 | Framework | Source | License (per source) |
 |---|---|---|
-| **LLM Security** | [OWASP Top 10 for LLM Applications 2025](https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/) | CC BY-SA 4.0 |
+| **LLM Security** | [OWASP Top 10 for LLM Applications 2025](https://genai.owasp.org) | CC BY-SA 4.0 |
 | **NHI Security** | [OWASP Non-Human Identities Top 10](https://owasp.org/www-project-non-human-identities-top-10/) | Per OWASP project terms — verify current license on source |
 | **Agentic Security (ASI)** | [OWASP Top 10 for Agentic Applications, 2026](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) | Per OWASP project terms — verify current license on source |
 | **MCP Security** | [OWASP MCP Top 10 (beta)](https://owasp.org/www-project-mcp-top-10/) | **CC BY-NC-SA 4.0 — non-commercial** |
