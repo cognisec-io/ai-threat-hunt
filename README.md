@@ -9,6 +9,8 @@ No login. No paywall. Fork the whole thing.
 
 Founding maintainer: **[cognisec.io](https://cognisec.io)** — *Intelligence Secures Tomorrow*
 
+### 🌐 [**Access Live Environment**](https://ai-threat-hunt.vercel.app/)
+
 </div>
 
 ---
@@ -32,6 +34,10 @@ Two stages, every time: break it under default (insecure) conditions, then break
 | 📖 [**Field Manual**](./field-manual.html) | Not a case to crack — the actual methodology for running a red-team engagement, with working checklists |
 
 ## Running it
+
+### Live Instance
+The fastest way to explore the project is via the hosted live environment:
+👉 **[ai-threat-hunt.vercel.app](https://ai-threat-hunt.vercel.app/)**
 
 No build step, no server, no dependencies. Clone or download the repo, keep all files in the same folder, and open `index.html` in a browser.
 
