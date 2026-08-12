@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NHI Security Battlefield — AI Threat Hunt</title>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=Archivo+Black&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:           #08080a;
+  --bg2:          #131318;
+  --bg3:          #1b1b22;
+  --bg4:          #25252e;
+  --overlay-soft: rgba(255,255,255,0.03);
+  --t:            #ffffff;
+  --t1:           #f1efe9;
+  --t2:           #a8a4ae;
+  --t3:           #68646f;
+  --border:       rgba(255,255,255,0.08);
+  --border-strong:rgba(255,255,255,0.16);
+  --border-brand: rgba(62,197,232,0.30);
+  --red:      #ff4d5e;
+  --orange:   #ffa63e;
+  --green:    #2dd4a8;
+  --purple:   #a875e0;
+  --accent:   #3ec5e8;
+  --accent2:  #6f9bf0;
+  --red-bg:    rgba(255,77,94,0.12);
+  --orange-bg: rgba(255,166,62,0.12);
+  --green-bg:  rgba(45,212,168,0.12);
+  --accent-bg: rgba(62,197,232,0.10);
+  --red-bd:    rgba(255,77,94,0.32);
+  --orange-bd: rgba(255,166,62,0.32);
+  --green-bd:  rgba(45,212,168,0.32);
+  --accent-bd: rgba(62,197,232,0.32);
+  --shadow-1: 0 1px 4px rgba(0,0,0,0.35);
+  --shadow-2: 0 2px 14px rgba(0,0,0,0.45);
+  --mono:    'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+  --display: 'Jost', -apple-system, sans-serif;
+  --display2:'Archivo Black', 'Jost', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body { font-family: var(--display); background: var(--bg); color: var(--t1); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration: none; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+
+.report-body { max-width: 1280px; margin: 0 auto; padding: 26px 36px 60px; }
+
+.crumb { font-family: var(--mono); font-size: 10.5px; color: var(--t3); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 16px; display: flex; gap: 8px; align-items: center; }
+.crumb a:hover { color: var(--accent); }
+
+.report-header {
+  margin-bottom: 22px; padding: 24px 36px 20px; margin-left: -36px; margin-right: -36px;
+  border-bottom: 2px solid var(--border-brand); position: relative; overflow: hidden;
+  background: radial-gradient(circle, rgba(62,197,232,.16), transparent 65%) -5% -120%/55% 260% no-repeat, var(--bg2);
+}
+.report-header-top { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: flex-start; margin-bottom: 14px; }
+.report-eyebrow { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; display: block; }
+.report-threat-id { font-family: var(--display2); font-size: 25px; color: var(--t); margin-bottom: 5px; }
+.report-threat-name { font-size: 14px; color: var(--t2); margin-bottom: 10px; }
+.report-threat-summary { font-size: 12.5px; color: var(--t3); font-style: italic; border-left: 3px solid var(--border-brand); padding-left: 12px; max-width: 640px; }
+.sev-block { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.sev-label { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; color: var(--t3); text-transform: uppercase; }
+.sev-badge { font-family: var(--display); font-size: 13px; font-weight: 700; padding: 5px 16px; border-radius: 6px; color: var(--accent); background: var(--accent-bg); border: 1px solid var(--accent-bd); letter-spacing: .06em; text-transform: uppercase; }
+
+.stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
+.stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 18px 14px; text-align: center; box-shadow: var(--shadow-1); }
+.stat-num { font-family: var(--display2); font-size: 28px; color: var(--accent); }
+.stat-lbl { font-family: var(--mono); font-size: 8.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--t3); margin-top: 4px; }
+
+.main-grid { display: grid; grid-template-columns: 240px 1fr; gap: 18px; align-items: stretch; }
+
+/* left list */
+.vlist { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.vlist-hdr { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--t3); padding: 12px 14px; border-bottom: 1px solid var(--border); }
+.vitem { display: flex; align-items: center; gap: 8px; padding: 10px 14px; font-size: 12px; cursor: pointer; border-bottom: 1px solid var(--border); color: var(--t2); transition: background .15s; }
+.vitem:last-child { border-bottom: none; }
+.vitem:hover { background: var(--overlay-soft); }
+.vitem.active { background: rgba(62,197,232,.08); color: var(--t1); border-left: 2px solid var(--accent); }
+.vitem .id { font-family: var(--mono); font-size: 10px; color: var(--t3); min-width: 34px; }
+.vitem.active .id { color: var(--accent); }
+.vitem .check { margin-left: auto; width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--border-strong); flex-shrink: 0; }
+.vitem.done .check { background: var(--green); border-color: var(--green); }
+
+/* right detail panel */
+.panel { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-2); }
+.panel-hdr { padding: 16px 22px; border-bottom: 1px solid var(--border); background: linear-gradient(90deg, rgba(62,197,232,.08), transparent 70%), var(--bg3); display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.panel-title-group .pid { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: .08em; }
+.panel-title-group .pname { font-family: var(--display); font-size: 19px; font-weight: 600; color: var(--t); margin-top: 2px; }
+.patch-btn { font-family: var(--mono); font-size: 11px; font-weight: 600; padding: 9px 16px; border-radius: 6px; border: 1.5px solid var(--green); color: var(--green); background: transparent; cursor: pointer; letter-spacing: .04em; white-space: nowrap; }
+.patch-btn:hover { background: var(--green-bg); }
+.patch-btn.is-done { border-color: var(--t3); color: var(--t3); }
+
+.panel-body { padding: 22px; }
+.sub-hdr { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent2); margin: 20px 0 10px; }
+.sub-hdr:first-child { margin-top: 0; }
+.desc-text { font-size: 13px; color: var(--t2); line-height: 1.75; }
+
+.risk-list { display: flex; flex-direction: column; gap: 8px; }
+.risk-item { display: flex; gap: 10px; padding: 9px 12px; background: var(--overlay-soft); border: 1px solid var(--border); border-radius: 6px; border-left: 3px solid var(--red); font-size: 12px; color: var(--t2); }
+.risk-item b { color: var(--t1); }
+
+.rem-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; margin-bottom: 7px; border-radius: 6px; background: var(--overlay-soft); border: 1px solid var(--border); border-left: 3px solid var(--accent); font-size: 12px; color: var(--t2); }
+.rem-item:last-child { margin-bottom: 0; }
+.rem-num { font-family: var(--mono); font-size: 10px; color: var(--accent); flex-shrink: 0; }
+
+.scenario-box { background: var(--bg3); border: 1px dashed var(--border-strong); border-radius: 6px; padding: 14px 16px; font-size: 12.5px; color: var(--t2); font-style: italic; }
+
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.mitre-chip { font-family: var(--mono); font-size: 9.5px; padding: 3px 9px; background: var(--accent-bg); border: 1px solid var(--accent-bd); border-radius: 4px; color: var(--accent); }
+
+footer { border-top: 1px solid var(--border); margin-top: 26px; padding: 20px 0 0; font-family: var(--mono); font-size: 10.5px; color: var(--t3); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+footer a:hover { color: var(--accent); }
+
+@media (max-width: 860px) {
+  .report-header, .report-header { margin-left: -20px; margin-right: -20px; padding-left: 20px; padding-right: 20px; }
+  .report-body { padding: 20px; }
+  .stat-row { grid-template-columns: 1fr 1fr; }
+  .main-grid { grid-template-columns: 1fr; }
+  .report-header-top { grid-template-columns: 1fr; }
+  .sev-block { align-items: flex-start; }
+  .sim-wrap { grid-template-columns: 1fr; }
+}
+
+.status-pill { font-family: var(--mono); font-size: 10.5px; padding: 6px 12px; border-radius: 20px; white-space: nowrap; }
+.status-pill.locked { background: var(--overlay-soft); color: var(--t3); border: 1px solid var(--border); }
+.status-pill.verified { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bd); }
+
+.mtabs { display: flex; gap: 2px; padding: 0 22px; border-bottom: 1px solid var(--border); background: var(--bg3); }
+.mtab { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; padding: 12px 16px; color: var(--t3); cursor: pointer; border-bottom: 2px solid transparent; background: none; border-top: none; border-left: none; border-right: none; }
+.mtab:hover { color: var(--t2); }
+.mtab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.sim-wrap { display: grid; grid-template-columns: 1fr 220px; gap: 16px; align-items: stretch; }
+.sim-brief { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--t2); margin-bottom: 14px; }
+.sim-brief b { color: var(--t1); }
+.chat-box { display: flex; flex-direction: column; background: #050506; border: 1px solid var(--border); border-radius: 8px; min-height: 180px; max-height: 380px; overflow: hidden; }
+.chat-window { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.msg { max-width: 85%; padding: 9px 12px; border-radius: 8px; font-size: 12.5px; line-height: 1.55; }
+.msg.user { align-self: flex-end; background: var(--accent-bg); border: 1px solid var(--accent-bd); color: var(--t1); }
+.msg.bot { align-self: flex-start; background: var(--bg3); border: 1px solid var(--border); color: var(--t2); }
+.msg.bot.leak { border-color: var(--red-bd); background: var(--red-bg); color: var(--t1); }
+.msg.bot.blocked { border-color: var(--orange-bd); background: var(--orange-bg); color: var(--t1); }
+.msg .tag { display: block; font-family: var(--mono); font-size: 8.5px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px; opacity: .7; }
+.chat-input-row { display: flex; gap: 8px; margin-top: 10px; }
+.chat-input { flex: 1; background: var(--bg3); border: 1px solid var(--border-strong); border-radius: 6px; padding: 10px 12px; color: var(--t1); font-family: var(--display); font-size: 12.5px; }
+.chat-input:focus { outline: none; border-color: var(--accent); }
+.chat-send { font-family: var(--mono); font-size: 11px; padding: 0 16px; border-radius: 6px; border: 1px solid var(--accent-bd); color: var(--accent); background: var(--accent-bg); cursor: pointer; }
+.chat-send:hover { background: rgba(62,197,232,.2); }
+
+.sim-side { display: flex; flex-direction: column; gap: 10px; justify-content: space-between; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.sim-stat { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
+.sim-stat .n { font-family: var(--display2); font-size: 22px; color: var(--accent); }
+.sim-stat .l { font-family: var(--mono); font-size: 8.5px; color: var(--t3); letter-spacing: .06em; text-transform: uppercase; margin-top: 2px; }
+.harden-btn { font-family: var(--mono); font-size: 10.5px; padding: 10px; border-radius: 6px; border: 1.5px solid var(--purple); color: var(--purple); background: transparent; cursor: pointer; }
+.harden-btn.on { background: rgba(168,117,224,.15); }
+.harden-btn:hover { background: rgba(168,117,224,.12); }
+.harden-btn:disabled { border-color: var(--border-strong); color: var(--t3); cursor: not-allowed; background: transparent; }
+.harden-btn:disabled:hover { background: transparent; }
+.stage-badge { font-family: var(--mono); font-size: 9px; padding: 5px 8px; border-radius: 4px; text-align: center; letter-spacing: .05em; }
+.stage-badge.pending { background: var(--overlay-soft); color: var(--t3); border: 1px solid var(--border); }
+.stage-badge.won { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bd); }
+
+.share-card { margin-top: 16px; background: linear-gradient(135deg, rgba(62,197,232,.10), rgba(168,117,224,.08)); border: 1px solid var(--border-brand); border-radius: 10px; padding: 18px; }
+.share-title { font-family: var(--display); font-size: 15px; color: var(--t1); margin-bottom: 8px; }
+.share-text { font-family: var(--mono); font-size: 11.5px; color: var(--t2); background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 12px; margin-bottom: 10px; line-height: 1.6; white-space: pre-wrap; }
+.share-copy { font-family: var(--mono); font-size: 11px; padding: 8px 14px; border-radius: 6px; border: 1px solid var(--green-bd); color: var(--green); background: var(--green-bg); cursor: pointer; }
+.share-copy:hover { background: rgba(45,212,168,.25); }
+
+.placeholder-box { text-align: center; padding: 40px 20px; color: var(--t3); font-size: 12.5px; }
+.placeholder-box .big { font-size: 26px; margin-bottom: 10px; }
+
+.hint-row { flex-shrink: 0; border-top: 1px solid var(--border); padding: 10px 14px; background: rgba(111,155,240,.04); }
+.hint-row.empty { border-top: none; padding: 0; background: none; }
+.hint-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 6px; background: rgba(111,155,240,.08); border: 1px solid rgba(111,155,240,.28); font-size: 12px; color: var(--t2); }
+.hint-nav { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+.hint-arrow { font-family: var(--mono); font-size: 12px; width: 22px; height: 22px; border-radius: 4px; border: 1px solid rgba(111,155,240,.4); color: var(--accent2); background: rgba(111,155,240,.1); cursor: pointer; line-height: 1; }
+.hint-arrow:hover:not(:disabled) { background: rgba(111,155,240,.22); }
+.hint-arrow:disabled { opacity: .3; cursor: default; }
+.hint-label { font-family: var(--mono); font-size: 9px; color: var(--accent2); flex-shrink: 0; min-width: 40px; }
+.hint-btn { font-family: var(--mono); font-size: 10.5px; padding: 8px 14px; border-radius: 6px; border: 1px solid rgba(111,155,240,.4); color: var(--accent2); background: rgba(111,155,240,.08); cursor: pointer; }
+.hint-btn:hover { background: rgba(111,155,240,.18); }
+.hint-btn:disabled { opacity: .4; cursor: default; }
+.hint-count { font-family: var(--mono); font-size: 9px; color: var(--t3); margin-top: 6px; }
+
+/* investigate mechanic */
+.invest-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.invest-card { border: 1px solid var(--border); border-radius: 6px; padding: 11px 13px; background: var(--bg3); }
+.invest-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; gap: 8px; }
+.invest-label { font-family: var(--mono); font-size: 11.5px; color: var(--t1); font-weight: 600; }
+.invest-btn { font-family: var(--mono); font-size: 9.5px; padding: 4px 9px; border-radius: 4px; border: 1px solid var(--accent-bd); color: var(--accent); background: var(--accent-bg); cursor: pointer; white-space: nowrap; }
+.invest-btn:hover { background: rgba(62,197,232,.2); }
+.invest-summary { font-size: 12px; color: var(--t2); margin-bottom: 7px; }
+.invest-detail { font-size: 11.5px; color: var(--t1); background: rgba(255,255,255,.03); border-left: 2px solid var(--accent); padding: 8px 10px; margin-bottom: 9px; font-family: var(--mono); line-height: 1.6; }
+.invest-flag { font-family: var(--mono); font-size: 10px; padding: 7px 12px; border-radius: 5px; border: 1px solid var(--red-bd); color: var(--red); background: var(--red-bg); cursor: pointer; width: 100%; }
+.invest-flag:hover:not(:disabled) { background: rgba(255,77,94,.2); }
+.invest-flag:disabled { opacity: .35; cursor: not-allowed; }
+
+/* configure mechanic */
+.toggle-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 6px; background: var(--overlay-soft); border: 1px solid var(--border); margin-bottom: 8px; font-size: 12.5px; color: var(--t2); cursor: pointer; }
+.toggle-row:last-child { margin-bottom: 0; }
+.toggle-row:hover { border-color: var(--border-strong); }
+.toggle-row input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+.config-panel { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.run-btn { font-family: var(--mono); font-size: 12px; font-weight: 600; padding: 11px; border-radius: 6px; border: 1px solid var(--accent-bd); color: var(--accent); background: var(--accent-bg); cursor: pointer; width: 100%; margin-top: 12px; }
+.run-btn:hover { background: rgba(62,197,232,.2); }
+
+/* meter mechanic */
+.meter-log { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; min-height: 140px; max-height: 220px; }
+.meter-controls { margin-top: 10px; }
+.meter-gauge { height: 14px; background: #141d3f; border-radius: 8px; overflow: hidden; margin-bottom: 6px; border: 1px solid var(--border); }
+.meter-fillbar { height: 100%; background: linear-gradient(90deg, var(--green), var(--orange), var(--red)); transition: width .3s ease; }
+.meter-fill-label { font-family: var(--mono); font-size: 11px; color: var(--t2); margin-bottom: 10px; display: block; }
+</style>
+</head>
+<body>
+
+<div class="report-body">
+  <div class="crumb"><a href="ai-threat-hunt-hub.html">AI Threat Hunt</a> / <span>NHI Security</span></div>
+
+  <div class="report-header">
+    <div class="report-header-top">
+      <div>
+        <span class="report-eyebrow">Battlefield · Case Files NHI1–NHI10</span>
+        <div class="report-threat-id">NHI SECURITY</div>
+        <div class="report-threat-name">The machine identities behind every call</div>
+        <div class="report-threat-summary">Ten ways non-human identities — service accounts, API keys, agent credentials — become the weak link, even when the AI itself is airtight. Sourced from OWASP Non-Human Identities Top 10, 2025.</div>
+      </div>
+      <div class="sev-block">
+        <span class="sev-label">Cases filed</span>
+        <span class="sev-badge" id="sevBadge">0 / 10 cracked</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-card"><div class="stat-num">10</div><div class="stat-lbl">vulnerabilities</div></div>
+    <div class="stat-card"><div class="stat-num" id="statPatched">0</div><div class="stat-lbl">cracked by you</div></div>
+    <div class="stat-card"><div class="stat-num">10</div><div class="stat-lbl">live cases</div></div>
+    <div class="stat-card"><div class="stat-num">2025</div><div class="stat-lbl">OWASP edition</div></div>
+  </div>
+
+  <div class="main-grid">
+    <div class="vlist" id="vlist">
+      <div class="vlist-hdr">Case files</div>
+      <!-- items injected by JS -->
+    </div>
+
+    <div class="panel">
+      <div class="panel-hdr">
+        <div class="panel-title-group">
+          <div class="pid" id="pId">NHI1</div>
+          <div class="pname" id="pName">Improper Offboarding</div>
+        </div>
+        <span class="status-pill locked" id="statusPill">not attempted</span>
+      </div>
+      <div class="mtabs" id="mtabs"></div>
+      <div class="panel-body" id="panelBody">
+        <!-- injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div>Content adapted from <a href="https://owasp.org/www-project-non-human-identities-top-10/2025/" target="_blank">OWASP Non-Human Identities Top 10, 2025</a> — paraphrased for this field manual. All 10 cases live.</div>
+    <div><a href="ai-threat-hunt-hub.html">← back to hub</a></div>
+  </footer>
+</div>
+
+<script>
+const VULNS = [
+  {
+    id: "NHI01", name: "Improper Offboarding",
+    desc: "When a service account, API key, or other machine identity's human owner leaves — or the system it supported gets decommissioned — the credential itself doesn't automatically go away. It just sits there, active, until someone remembers to kill it. Given how hard NHIs are to inventory in the first place, that 'someone' often never comes.",
+    risks: [
+      "Dormant Kubernetes service accounts left active in decommissioned clusters",
+      "Ex-employee credentials that still work months after departure",
+      "Orphaned NHIs with no owner responsible for reviewing or revoking them"
+    ],
+    mitigations: [
+      "Tie NHI revocation directly to the HR offboarding workflow, not a manual afterthought",
+      "Automate offboarding by integrating IAM tooling with HR systems",
+      "Periodically recertify every NHI — confirm it's still needed and still has an owner",
+      "Regularly audit active NHIs for usage patterns that suggest they're stale"
+    ],
+    scenario: "A skilled developer who built a business-critical app leaves the company. Ownership transfers on paper, but nobody on the new team fully understands that the app still relies on an old access key. It sits active and unnoticed — a quiet, high-value target for lateral movement.",
+    atlas: ["Microsoft Midnight Blizzard Breach (2024)", "Ex-Employee NCS Sabotage Case"]
+  },
+  {
+    id: "NHI02", name: "Secret Leakage",
+    desc: "API keys, tokens, and certificates get hardcoded into source, dropped into config files, or pasted into chat — anywhere a developer needed to move fast. Once a secret escapes into an unsanctioned place, it's effectively public: scanners, both defensive and malicious, find hardcoded credentials in code repositories within minutes.",
+    risks: [
+      "Secrets committed directly into source code or config files",
+      "Credentials pasted into logs, chat tools, or shared documents",
+      "High-privilege secrets (DB connection strings, admin API keys) leaking with severe blast radius"
+    ],
+    mitigations: [
+      "Replace static secrets with short-lived, ephemeral credentials wherever possible",
+      "Store all secrets in a dedicated vault — never hardcoded",
+      "Run automated secret-scanning in CI/CD to catch leaks before merge",
+      "Restrict each secret's scope to only what actually needs it",
+      "Rotate secrets on a schedule, not just after an incident"
+    ],
+    scenario: "An Azure SAS token gets committed to a public GitHub repo. Attackers find it, authenticate as the associated subscription, and quietly read internal Microsoft Teams messages for weeks before anyone notices.",
+    atlas: ["Microsoft AI Researcher SAS Token Leak (2023)", "Uber Breach (2022)"]
+  },
+  {
+    id: "NHI03", name: "Vulnerable Third-Party NHI",
+    desc: "Every IDE extension, SaaS integration, and third-party plugin you grant API access to becomes a new non-human identity with a foothold in your systems — usually built and maintained by people outside your organization who may not follow your security standards. If that vendor gets breached, or ships a malicious update, the credentials you gave them go with it.",
+    risks: [
+      "A compromised or malicious extension update stealing the credentials it was granted",
+      "Third-party SaaS breaches exposing database credentials you shared with them",
+      "OAuth tokens for one integration being reused to reach far more than intended"
+    ],
+    mitigations: [
+      "Security-review any third-party tool before granting it access",
+      "Grant only least-privilege, narrowly scoped credentials — never broad admin tokens",
+      "Continuously monitor third-party API activity for anomalies",
+      "Use short-lived, rotating credentials instead of long-term tokens for integrations",
+      "Keep an inventory of every OAuth grant and revoke anything unused"
+    ],
+    scenario: "Attackers compromise OAuth tokens tied to a sales-tool integration. Over ten days, they use those tokens to quietly exfiltrate a large volume of a connected CRM's data — then delete their own query logs to cover their tracks.",
+    atlas: ["Sisense Breach", "Salesloft Drift OAuth Token Breach (2025)"]
+  },
+  {
+    id: "NHI04", name: "Insecure Authentication",
+    desc: "Not all authentication methods are created equal, and plenty of legacy ones are still in wide use: deprecated OAuth flows that expose tokens in URLs, app-specific passwords that quietly bypass MFA, or homegrown login schemes that only resemble OAuth without its protections. Picking the wrong one undermines every other control layered on top.",
+    risks: [
+      "Deprecated OAuth flows (like Implicit Flow) exposing tokens in browser history or logs",
+      "App passwords that bypass MFA entirely for 'compatibility'",
+      "Custom, non-standard authentication implementations missing key protections"
+    ],
+    mitigations: [
+      "Standardize on OAuth 2.1 and OIDC; retire deprecated flows like Implicit Flow",
+      "Use PKCE for any authorization code flow",
+      "Prefer credential-less, ephemeral authentication over static API keys",
+      "Audit for and eliminate app-password-style MFA bypasses",
+      "Regularly review which authentication methods are actually in use across your services"
+    ],
+    scenario: "A platform issues app-specific passwords so legacy tools can 'skip' modern login. Every account still shows MFA as fully enforced in the dashboard — but any app password that leaks walks straight past it, no second factor required.",
+    atlas: ["Cloudflare Breach", "Snowflake Breach (2024)"]
+  },
+  {
+    id: "NHI05", name: "Overprivileged NHI",
+    desc: "Non-human identities routinely get more permission than their job requires — often granted admin-level access 'just to make sure it works,' with nobody circling back to right-size it later. When (not if) that identity is compromised, the attacker inherits everything it was allowed to touch, not just what it actually used.",
+    risks: [
+      "Service accounts and CI runners granted admin access far beyond their actual task",
+      "OAuth apps given broad write access when they only needed narrow read access",
+      "A single compromised over-privileged identity leading to full cloud-account takeover"
+    ],
+    mitigations: [
+      "Enforce least privilege — assign only the permissions a task strictly requires",
+      "Regularly audit and right-size permissions; don't let 'temporary' broad access become permanent",
+      "Set organization-wide guardrails that block excessively permissive configurations by default",
+      "Use just-in-time privilege elevation instead of standing broad access"
+    ],
+    scenario: "A Jenkins CI runner is mistakenly assigned AWS AdministratorAccess, even though it only ever needed EKS and ECS permissions. When an attacker exploits an unrelated vulnerability on that instance, they inherit full administrative control of the AWS account — not just the ability to deploy containers.",
+    atlas: ["CircleCI Breach (2023)", "Verkada Breach (2021)"]
+  },
+  {
+    id: "NHI06", name: "Insecure Cloud Deployment Configurations",
+    desc: "CI/CD pipelines need to authenticate to cloud services to do their job — and that authentication is often either a static, exposure-prone credential, or an OIDC setup that's easy to misconfigure. A trust relationship that doesn't tightly restrict who's allowed to assume a role turns a convenience feature into an open door.",
+    risks: [
+      "Hardcoded cloud credentials in pipeline config files",
+      "OIDC trust relationships that don't restrict the `sub` claim, letting any user on a public platform assume a role",
+      "Misconfigurations that are easy to find once an attacker has any read access to the environment"
+    ],
+    mitigations: [
+      "Use OIDC with short-lived, dynamically generated tokens instead of static credentials",
+      "Strictly validate token issuer, audience, and claims — especially the subject claim",
+      "Limit CI/CD pipeline permissions to the absolute minimum needed",
+      "Scan configuration files and repositories regularly for exposed credentials"
+    ],
+    scenario: "An AWS IAM role trusts GitHub's OIDC provider for AssumeRoleWithWebIdentity but never restricts the sub claim to a specific repository. Any GitHub Actions workflow, from any repository on the platform, can potentially assume that role.",
+    atlas: ["Misconfigured GitLab OIDC AWS IAM Role Exploits"]
+  },
+  {
+    id: "NHI07", name: "Long-Lived Secrets",
+    desc: "A secret that never expires — or expires so far in the future it may as well not — turns a single leak into an unlimited-time backdoor. Rotation is genuinely hard to operationalize, so long-lived credentials are everywhere, and most secret managers make it trivially easy to see just how old they've gotten, which, more often than not, is a very long time.",
+    risks: [
+      "Sensitive access tokens sitting unrotated in old data dumps or backups for years",
+      "Long-lived session cookies stolen by infostealer malware and resold",
+      "Credentials that remain exploitable indefinitely once leaked, with no time-based safety net"
+    ],
+    mitigations: [
+      "Automate credential rotation instead of relying on manual processes",
+      "Use short-lived, auto-expiring credentials wherever the platform supports it",
+      "Adopt zero-trust re-authentication for sensitive actions, not just initial login",
+      "Enforce least privilege so an eventually-leaked credential has limited blast radius"
+    ],
+    scenario: "An attacker with low-level network access stumbles on a year-old data dump containing a still-valid admin access token. Because nothing about that token ever expired or rotated, it works exactly as well today as the day it was created.",
+    atlas: ["Rabbit Inc. API Key Leak (2024)", "Hugging Face Space Secrets Leak (2024)"]
+  },
+  {
+    id: "NHI08", name: "Environment Isolation",
+    desc: "Test, staging, and production are supposed to be separate worlds — but the non-human identities connecting to them often aren't. Reusing the same service account or access key across environments means a breach in your least-protected environment can become a direct path into your most sensitive one.",
+    risks: [
+      "A single AWS access key valid in both test and production S3 buckets",
+      "A shared managed identity spanning a test subscription and a production subscription",
+      "Test environments — typically far less monitored — becoming a backdoor into production"
+    ],
+    mitigations: [
+      "Assign a unique NHI to every environment — never share credentials across dev/test/staging/prod",
+      "Enforce least privilege within each environment separately",
+      "Configure access policies so non-production identities simply cannot reach production resources",
+      "Use separate accounts, subscriptions, or resource groups to physically segregate environments"
+    ],
+    scenario: "A managed identity is configured to work across both a test subscription and a production subscription, for convenience. An attacker who compromises the far-less-guarded test environment uses that same identity to walk straight into production.",
+    atlas: ["Cross-environment AWS key reuse incidents"]
+  },
+  {
+    id: "NHI09", name: "NHI Reuse",
+    desc: "Giving every workload its own identity is more setup work than handing out one shared credential to several of them — so teams often take the shortcut. The problem shows up the moment any one of those workloads is compromised: the attacker doesn't just get that workload, they get everything else sharing its identity too.",
+    risks: [
+      "Multiple Kubernetes pods sharing one service account, including sensitive orchestration pods",
+      "One API key reused across several unrelated applications",
+      "Shared cloud credentials letting a breach in a less-secure service reach a more-secure one"
+    ],
+    mitigations: [
+      "Assign a unique NHI to every application or service component — no exceptions for convenience",
+      "Use distinct NHIs per environment as well as per service",
+      "Enforce least privilege on every individual identity",
+      "Regularly audit for any identity being used by more than one component"
+    ],
+    scenario: "Multiple pods in a Kubernetes cluster — including ones responsible for orchestration — all share a single service account. A vulnerability in one unrelated pod gives an attacker that same account, and with it, reach across the entire cluster.",
+    atlas: ["Chronicle cross-customer bucket access"]
+  },
+  {
+    id: "NHI10", name: "Human Use of NHI",
+    desc: "It's fast and tempting for a developer to just log in as the service account instead of provisioning their own scoped access — but every time a human wears a machine identity, two things break at once: the NHI ends up with more standing privilege than its automated job ever needed, and nobody can tell, from the logs, whether a person or a script just did something.",
+    risks: [
+      "Admins using service-account credentials for convenience during manual debugging",
+      "Actions attributed to an NHI in logs when a human actually performed them, destroying accountability",
+      "Attackers who've stolen NHI credentials persisting undetected, since NHIs typically don't trigger MFA or password-expiry prompts"
+    ],
+    mitigations: [
+      "Provision dedicated, appropriately-scoped human identities for manual/debug tasks — never reuse the service account",
+      "Actively audit and monitor NHI activity so human use becomes visible and attributable",
+      "Use conditional access policies that flag or block human-pattern access to machine identities",
+      "Train developers and admins on why 'just borrowing the bot's login' is a real risk, not a shortcut"
+    ],
+    scenario: "Twenty developers have, over time, all used the same automation service account to poke around production when debugging. Eight of them left the company eighteen months ago. Nobody has ever audited who's actually been logging in as that account, or when.",
+    atlas: ["Anetac Report: 75% of orgs misuse service accounts"]
+  }
+];
+
+/* ============================================================
+   SHARED APP STATE (case list, tabs, verified status)
+   ============================================================ */
+let current = 0;
+let activeTab = 'brief';
+let verified = {};
+let caseSim = {};
+
+async function loadProgress() {
+  for (const v of VULNS) {
+    try {
+      const res = await window.storage.get('verified:' + v.id);
+      verified[v.id] = res ? JSON.parse(res.value) : false;
+    } catch (e) { verified[v.id] = false; }
+  }
+}
+
+async function setVerified(id, val) {
+  verified[id] = val;
+  try { await window.storage.set('verified:' + id, JSON.stringify(val)); } catch (e) {}
+  renderList(); renderStats(); renderHeader();
+}
+
+function renderList() {
+  const list = document.getElementById('vlist');
+  list.innerHTML = '<div class="vlist-hdr">Case files</div>' + VULNS.map((v, i) => `
+    <div class="vitem ${i === current ? 'active' : ''} ${verified[v.id] ? 'done' : ''}" data-i="${i}">
+      <span class="id">${v.id}</span>
+      <span>${v.name}</span>
+      <span class="check"></span>
+    </div>
+  `).join('');
+  list.querySelectorAll('.vitem').forEach(el => {
+    el.addEventListener('click', () => { current = parseInt(el.dataset.i); activeTab = 'brief'; renderAll(); });
+  });
+}
+
+function renderStats() {
+  const done = Object.values(verified).filter(Boolean).length;
+  document.getElementById('sevBadge').textContent = done + ' / 10 cracked';
+  document.getElementById('statPatched').textContent = done;
+}
+
+function renderHeader() {
+  const v = VULNS[current];
+  document.getElementById('pId').textContent = v.id;
+  document.getElementById('pName').textContent = v.name;
+  const pill = document.getElementById('statusPill');
+  const isDone = !!verified[v.id];
+  pill.textContent = isDone ? '✓ cracked — both stages verified' : (v.hasSimulator ? 'not cracked yet' : 'briefing available');
+  pill.className = 'status-pill ' + (isDone ? 'verified' : 'locked');
+}
+
+function renderTabs() {
+  const v = VULNS[current];
+  document.getElementById('mtabs').innerHTML = `
+    <button class="mtab ${activeTab==='brief'?'active':''}" data-t="brief">① Briefing</button>
+    <button class="mtab ${activeTab==='attempt'?'active':''}" data-t="attempt">② Attempt${v.hasSimulator ? '' : ' (soon)'}</button>
+    <button class="mtab ${activeTab==='debrief'?'active':''}" data-t="debrief">③ Debrief</button>
+  `;
+  document.querySelectorAll('.mtab').forEach(el => {
+    el.addEventListener('click', () => { activeTab = el.dataset.t; renderBody(); document.querySelectorAll('.mtab').forEach(x=>x.classList.remove('active')); el.classList.add('active'); });
+  });
+}
+
+function renderBody() {
+  const v = VULNS[current];
+  const body = document.getElementById('panelBody');
+  if (activeTab === 'brief') {
+    body.innerHTML = `
+      <div class="sub-hdr">What's actually going on</div>
+      <div class="desc-text">${v.desc}</div>
+      <div class="sub-hdr">What it puts at risk</div>
+      <div class="risk-list">${v.risks.map(r => `<div class="risk-item">${r}</div>`).join('')}</div>
+      <p style="margin-top:16px;font-size:11.5px;color:var(--t3);font-family:var(--mono)">→ Head to <b style="color:var(--accent)">② Attempt</b> to actually try this against a live target.</p>
+    `;
+  } else if (activeTab === 'debrief') {
+    body.innerHTML = `
+      <div class="sub-hdr">Why the fix works</div>
+      ${v.mitigations.map((m, i) => `<div class="rem-item"><span class="rem-num">${String(i+1).padStart(2,'0')}</span><span>${m}</span></div>`).join('')}
+      <div class="sub-hdr">A real-world version of this</div>
+      <div class="scenario-box">${v.scenario}</div>
+      ${v.atlas.length ? `<div class="sub-hdr">Related frameworks</div><div class="chip-row">${v.atlas.map(a => `<span class="mitre-chip">${a}</span>`).join('')}</div>` : ''}
+    `;
+  } else if (activeTab === 'attempt') {
+    if (!v.hasSimulator) {
+      body.innerHTML = `<div class="placeholder-box"><div class="big">🚧</div><div>No live target built for this case yet.</div></div>`;
+    } else if (v.mechanic === 'chat') mountChatSim(v);
+    else if (v.mechanic === 'configure') mountConfigureSim(v);
+    else if (v.mechanic === 'investigate') mountInvestigateSim(v);
+    else if (v.mechanic === 'meter') mountMeterSim(v);
+    else if (v.mechanic === 'timelapse') mountTimelapseSim(v);
+  }
+}
+
+function renderAll() { renderList(); renderStats(); renderHeader(); renderTabs(); renderBody(); }
+
+function getSim(v) {
+  if (!caseSim[v.id]) {
+    caseSim[v.id] = { attempts: 0, wonStage1: false, wonStage2: false, hintUnlocked1: 0, hintPos1: -1, hintUnlocked2: 0, hintPos2: -1 };
+  }
+  return caseSim[v.id];
+}
+
+async function checkFullyCracked(v) {
+  const s = getSim(v);
+  if (s.wonStage1 && s.wonStage2) await setVerified(v.id, true);
+}
+
+function renderHintCarousel(rowId, hints1, hints2, s) {
+  const row = document.getElementById(rowId);
+  if (!row) return;
+  let hints, unlockedKey, posKey;
+  if (!s.wonStage1) { hints = hints1; unlockedKey = 'hintUnlocked1'; posKey = 'hintPos1'; }
+  else if (s.hardenedRelevant && !s.wonStage2) { hints = hints2; unlockedKey = 'hintUnlocked2'; posKey = 'hintPos2'; }
+  else { row.innerHTML = ''; row.classList.add('empty'); return; }
+  row.classList.remove('empty');
+
+  const unlocked = s[unlockedKey], pos = s[posKey];
+  if (unlocked === 0) {
+    row.innerHTML = `<button class="hint-btn" data-role="reveal">💡 Reveal hint (1/${hints.length})</button>`;
+    row.querySelector('[data-role=reveal]').onclick = () => { s[unlockedKey] = 1; s[posKey] = 0; renderHintCarousel(rowId, hints1, hints2, s); };
+    return;
+  }
+  const atStart = pos <= 0, canRevealMore = unlocked < hints.length, atLatest = pos >= unlocked - 1;
+  row.innerHTML = `
+    <div class="hint-card">
+      <div class="hint-nav">
+        <button class="hint-arrow" data-role="prev" ${atStart ? 'disabled' : ''}>‹</button>
+        <button class="hint-arrow" data-role="next" ${(atLatest && !canRevealMore) ? 'disabled' : ''}>›</button>
+      </div>
+      <span class="hint-label">HINT ${pos+1}/${hints.length}</span>
+      <span>${hints[pos]}</span>
+    </div>`;
+  row.querySelector('[data-role=prev]').onclick = () => { s[posKey] = Math.max(0, pos - 1); renderHintCarousel(rowId, hints1, hints2, s); };
+  row.querySelector('[data-role=next]').onclick = () => {
+    if (pos < unlocked - 1) { s[posKey] = pos + 1; }
+    else if (unlocked < hints.length) { s[unlockedKey] = unlocked + 1; s[posKey] = unlocked; }
+    renderHintCarousel(rowId, hints1, hints2, s);
+  };
+}
+
+function renderShareCard(slotId, v, s, verbTag) {
+  const slot = document.getElementById(slotId);
+  if (!slot) return;
+  if (s.wonStage1 && s.wonStage2) {
+    const totalHints = s.hintUnlocked1 + s.hintUnlocked2;
+    const hintNote = totalHints > 0 ? ` (${totalHints} hint${totalHints === 1 ? '' : 's'} used)` : ' (no hints used)';
+    const text = `🕵️ I cracked ${v.id}: ${v.name} on AI Threat Hunt.\n${verbTag} in ${s.attempts} total attempts${hintNote} — beat both stages.\nThink you can do it in fewer tries? → [link to this page]`;
+    slot.innerHTML = `<div class="share-card"><div class="share-title">🏆 Case cracked — both stages verified</div><div class="share-text">${text}</div><button class="share-copy" data-role="copy">Copy result to share</button></div>`;
+    slot.querySelector('[data-role=copy]').onclick = () => {
+      navigator.clipboard.writeText(text).then(() => {
+        const b = slot.querySelector('[data-role=copy]');
+        b.textContent = '✓ Copied'; setTimeout(() => b.textContent = 'Copy result to share', 1500);
+      });
+    };
+  } else slot.innerHTML = '';
+}
+
+function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+/* ============================================================
+   MECHANIC 1: CHAT (extraction) — LLM01, LLM02, LLM07
+   ============================================================ */
+function mountChatSim(v) {
+  const s = getSim(v);
+  if (s.messages === undefined) s.messages = [];
+  if (s.hardened === undefined) s.hardened = false;
+  const cfg = v.sim;
+
+  document.getElementById('panelBody').innerHTML = `
+    <div class="sim-wrap">
+      <div>
+        <div class="sim-brief"><b>Mission:</b> ${cfg.mission}</div>
+        <div class="chat-box">
+          <div class="chat-window" id="chatWindow"></div>
+          <div class="hint-row" id="hintRow"></div>
+        </div>
+        <div class="chat-input-row">
+          <input class="chat-input" id="chatInput" placeholder="Type a message to the bot…" />
+          <button class="chat-send" id="chatSend">Send</button>
+        </div>
+        <div id="shareSlot"></div>
+      </div>
+      <div class="sim-side">
+        <div class="sim-stat"><div class="n" id="attemptsN">${s.attempts}</div><div class="l">attempts</div></div>
+        <div class="stage-badge ${s.wonStage1?'won':'pending'}">Stage 1: baseline ${s.wonStage1?'✓ cracked':''}</div>
+        <button class="harden-btn ${s.hardened?'on':''}" id="hardenBtn" ${!s.wonStage1?'disabled':''}>${!s.wonStage1?'🔒 Crack Stage 1 first':(s.hardened?'🛡️ Defenses: ON':'🛡️ '+cfg.hardenLabel)}</button>
+        <div class="stage-badge ${s.wonStage2?'won':'pending'}">Stage 2: hardened ${s.wonStage2?'✓ cracked':''}</div>
+      </div>
+    </div>`;
+
+  s.hardenedRelevant = s.hardened;
+  renderChatMsgs(s);
+  document.getElementById('chatSend').onclick = () => sendChat(v);
+  document.getElementById('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(v); });
+  document.getElementById('hardenBtn').onclick = () => toggleHardenChat(v);
+  renderHintCarousel('hintRow', cfg.hints1, cfg.hints2, s);
+  renderShareCard('shareSlot', v, s, cfg.verbTag || 'Extracted the secret');
+}
+
+function renderChatMsgs(s) {
+  const win = document.getElementById('chatWindow');
+  if (!win) return;
+  win.innerHTML = s.messages.map(m => `
+    <div class="msg ${m.role==='user'?'user':m.cls}">
+      <span class="tag">${m.role==='user'?'you':(m.cls&&m.cls.includes('leak')?'bot · LEAKED':m.cls&&m.cls.includes('blocked')?'bot · blocked':'bot')}</span>
+      ${m.text}
+    </div>`).join('');
+  win.scrollTop = win.scrollHeight;
+  const a = document.getElementById('attemptsN'); if (a) a.textContent = s.attempts;
+}
+
+function sendChat(v) {
+  const s = getSim(v); const cfg = v.sim;
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim(); if (!text) return;
+  input.value = '';
+  s.attempts++;
+  s.messages.push({ role: 'user', text: escapeHtml(text) });
+  const reply = cfg.reply(text, s.hardened);
+  s.messages.push({ role: 'bot', text: reply.text, cls: reply.cls });
+  renderChatMsgs(s);
+  if (reply.cls.includes('leak')) {
+    if (!s.hardened && !s.wonStage1) { s.wonStage1 = true; checkFullyCracked(v).then(() => mountChatSim(v)); }
+    else if (s.hardened && !s.wonStage2) { s.wonStage2 = true; checkFullyCracked(v).then(() => mountChatSim(v)); }
+  }
+}
+
+function toggleHardenChat(v) {
+  const s = getSim(v);
+  if (!s.wonStage1) return;
+  s.hardened = !s.hardened;
+  s.messages.push({ role: 'bot', text: s.hardened ? v.sim.hardenMsg : 'Defenses disabled. Back to baseline.', cls: 'bot' });
+  mountChatSim(v);
+}
+
+/* ============================================================
+   MECHANIC 2: CONFIGURE (permission scoping) — LLM03, LLM04, LLM06
+   ============================================================ */
+function mountConfigureSim(v) {
+  const s = getSim(v);
+  if (!s.toggles) { s.toggles = {}; v.sim.toggles.forEach(t => s.toggles[t.id] = t.default); }
+  const cfg = v.sim;
+
+  document.getElementById('panelBody').innerHTML = `
+    <div class="sim-wrap">
+      <div>
+        <div class="sim-brief"><b>Mission:</b> ${cfg.mission}</div>
+        <div class="config-panel" id="configPanel"></div>
+        <button class="run-btn" id="runBtn">▶ Run scenario</button>
+        <div id="narrativeSlot"></div>
+        <div class="hint-row" id="hintRow" style="margin-top:12px;border-top:none;padding:0;"></div>
+        <div id="shareSlot"></div>
+      </div>
+      <div class="sim-side">
+        <div class="sim-stat"><div class="n" id="attemptsN">${s.attempts}</div><div class="l">runs</div></div>
+        <div class="stage-badge ${s.wonStage1?'won':'pending'}">Stage 1: witness breach ${s.wonStage1?'✓ cracked':''}</div>
+        <div class="stage-badge ${s.wonStage2?'won':'pending'}">Stage 2: safe &amp; working ${s.wonStage2?'✓ cracked':''}</div>
+      </div>
+    </div>`;
+
+  s.hardenedRelevant = s.wonStage1;
+  renderConfigToggles(v);
+  document.getElementById('runBtn').onclick = () => runConfigScenario(v);
+  renderHintCarousel('hintRow', cfg.hints1, cfg.hints2, s);
+  renderShareCard('shareSlot', v, s, cfg.verbTag || 'Found the safe configuration');
+}
+
+function renderConfigToggles(v) {
+  const s = getSim(v); const cfg = v.sim;
+  const panel = document.getElementById('configPanel');
+  panel.innerHTML = cfg.toggles.map(t => `
+    <label class="toggle-row">
+      <input type="checkbox" data-id="${t.id}" ${s.toggles[t.id] ? 'checked' : ''} />
+      <span>${t.label}</span>
+    </label>`).join('');
+  panel.querySelectorAll('input').forEach(inp => inp.onchange = () => { s.toggles[inp.dataset.id] = inp.checked; });
+}
+
+function runConfigScenario(v) {
+  const s = getSim(v); const cfg = v.sim;
+  s.attempts++;
+  const result = cfg.evaluate(s.toggles);
+  document.getElementById('narrativeSlot').innerHTML = `<div class="scenario-box" style="border-color:${result.breached ? 'var(--red-bd)' : 'var(--green-bd)'};margin-top:10px;border-style:solid;">${result.narrative}</div>`;
+
+  if (result.breached && !s.wonStage1) { s.wonStage1 = true; checkFullyCracked(v); } // fire-and-forget — updates the global header/list once it resolves
+  else if (!result.breached && s.wonStage1 && !s.wonStage2) { s.wonStage2 = true; checkFullyCracked(v); }
+
+  refreshConfigChrome(v); // update badges/hints/share WITHOUT re-rendering narrativeSlot
+}
+
+function refreshConfigChrome(v) {
+  const s = getSim(v); const cfg = v.sim;
+  const attemptsEl = document.getElementById('attemptsN'); if (attemptsEl) attemptsEl.textContent = s.attempts;
+  const badges = document.querySelectorAll('#panelBody .stage-badge');
+  if (badges[0]) { badges[0].textContent = `Stage 1: witness breach ${s.wonStage1 ? '✓ cracked' : ''}`; badges[0].className = 'stage-badge ' + (s.wonStage1 ? 'won' : 'pending'); }
+  if (badges[1]) { badges[1].textContent = `Stage 2: safe & working ${s.wonStage2 ? '✓ cracked' : ''}`; badges[1].className = 'stage-badge ' + (s.wonStage2 ? 'won' : 'pending'); }
+  s.hardenedRelevant = s.wonStage1;
+  renderHintCarousel('hintRow', cfg.hints1, cfg.hints2, s);
+  renderShareCard('shareSlot', v, s, cfg.verbTag || 'Found the safe configuration');
+}
+
+/* ============================================================
+   MECHANIC 2b: TIMELAPSE (secret lifetime) — NHI7
+   Same toggle UI as Configure, plus a simulated calendar you fast-forward.
+   ============================================================ */
+function mountTimelapseSim(v) {
+  const s = getSim(v);
+  if (!s.toggles) { s.toggles = {}; v.sim.toggles.forEach(t => s.toggles[t.id] = t.default); }
+  if (s.days === undefined) s.days = 0;
+  const cfg = v.sim;
+
+  document.getElementById('panelBody').innerHTML = `
+    <div class="sim-wrap">
+      <div>
+        <div class="sim-brief"><b>Mission:</b> ${cfg.mission}</div>
+        <div class="config-panel" id="configPanel"></div>
+        <button class="run-btn" id="advanceBtn">⏩ Advance ${cfg.stepDays} days &amp; check the leaked key</button>
+        <div id="narrativeSlot"></div>
+        <div class="hint-row" id="hintRow" style="margin-top:12px;border-top:none;padding:0;"></div>
+        <div id="shareSlot"></div>
+      </div>
+      <div class="sim-side">
+        <div class="sim-stat"><div class="n" id="attemptsN">${s.days}</div><div class="l">days elapsed</div></div>
+        <div class="stage-badge ${s.wonStage1?'won':'pending'}">Stage 1: it still works ${s.wonStage1?'✓ cracked':''}</div>
+        <div class="stage-badge ${s.wonStage2?'won':'pending'}">Stage 2: now it's dead ${s.wonStage2?'✓ cracked':''}</div>
+      </div>
+    </div>`;
+
+  s.hardenedRelevant = s.wonStage1;
+  renderConfigToggles(v);
+  document.getElementById('advanceBtn').onclick = () => advanceTimelapse(v);
+  renderHintCarousel('hintRow', cfg.hints1, cfg.hints2, s);
+  renderShareCard('shareSlot', v, s, cfg.verbTag || 'Watched the secret expire');
+}
+
+function advanceTimelapse(v) {
+  const s = getSim(v); const cfg = v.sim;
+  s.days += cfg.stepDays;
+  s.attempts++;
+  const result = cfg.evaluate(s.toggles, s.days);
+  document.getElementById('narrativeSlot').innerHTML = `<div class="scenario-box" style="border-color:${result.valid ? 'var(--red-bd)' : 'var(--green-bd)'};margin-top:10px;border-style:solid;">${result.narrative}</div>`;
+
+  if (result.valid && s.days >= cfg.witnessThreshold && !s.wonStage1) { s.wonStage1 = true; checkFullyCracked(v); }
+  else if (!result.valid && s.wonStage1 && !s.wonStage2) { s.wonStage2 = true; checkFullyCracked(v); }
+
+  const attemptsEl = document.getElementById('attemptsN'); if (attemptsEl) attemptsEl.textContent = s.days;
+  const badges = document.querySelectorAll('#panelBody .stage-badge');
+  if (badges[0]) { badges[0].textContent = `Stage 1: it still works ${s.wonStage1?'✓ cracked':''}`; badges[0].className = 'stage-badge ' + (s.wonStage1?'won':'pending'); }
+  if (badges[1]) { badges[1].textContent = `Stage 2: now it's dead ${s.wonStage2?'✓ cracked':''}`; badges[1].className = 'stage-badge ' + (s.wonStage2?'won':'pending'); }
+  s.hardenedRelevant = s.wonStage1;
+  renderHintCarousel('hintRow', cfg.hints1, cfg.hints2, s);
+  renderShareCard('shareSlot', v, s, cfg.verbTag || 'Watched the secret expire');
+}
+
+/* ============================================================
+   MECHANIC 3: INVESTIGATE (spot the flaw) — LLM05, LLM08, LLM09
+   ============================================================ */
+function mountInvestigateSim(v) {
+  const s = getSim(v);
+  if (!s.round) s.round = 1;
+  if (!s.inspected) s.inspected = new Set();
+  const cfg = v.sim;
+  const roundData = cfg.rounds[s.round - 1];
+
+  document.getElementById('panelBody').innerHTML = `
+    <div class="sim-wrap">
+      <div>
+        <div class="sim-brief"><b>Round ${s.round} of 2:</b> ${roundData.prompt}</div>
+        <div class="chat-box" style="max-height:none;">
+          <div class="invest-list" id="investList"></div>
+          <div class="hint-row" id="hintRow"></div>
+        </div>
+        <div id="feedbackSlot"></div>
+        <div id="shareSlot"></div>
+      </div>
+      <div class="sim-side">
+        <div class="sim-stat"><div class="n" id="attemptsN">${s.attempts}</div><div class="l">wrong flags</div></div>
+        <div class="stage-badge ${s.wonStage1?'won':'pending'}">Round 1 ${s.wonStage1?'✓ cracked':''}</div>
+        <div class="stage-badge ${s.wonStage2?'won':'pending'}">Round 2 ${s.wonStage2?'✓ cracked':''}</div>
+      </div>
+    </div>`;
+
+  s.hardenedRelevant = (s.round === 2);
+  renderInvestList(v);
+  renderHintCarousel('hintRow', cfg.hints1, cfg.hints2, s);
+  renderShareCard('shareSlot', v, s, cfg.verbTag || 'Spotted the flaw');
+}
+
+function renderInvestList(v) {
+  const s = getSim(v); const cfg = v.sim;
+  const roundData = cfg.rounds[s.round - 1];
+  const allInspected = roundData.items.every(it => s.inspected.has(it.id));
+  const roundWon = s.round === 1 ? s.wonStage1 : s.wonStage2;
+  const list = document.getElementById('investList');
+  list.innerHTML = roundData.items.map(it => `
+    <div class="invest-card">
+      <div class="invest-hdr">
+        <span class="invest-label">${it.label}</span>
+        <button class="invest-btn" data-role="inspect" data-id="${it.id}">${s.inspected.has(it.id) ? '🔍 Inspected' : '🔍 Inspect'}</button>
+      </div>
+      <div class="invest-summary">${it.summary}</div>
+      ${s.inspected.has(it.id) ? `<div class="invest-detail">${it.detail}</div>` : ''}
+      <button class="invest-flag" data-role="flag" data-id="${it.id}" ${(!allInspected || roundWon) ? 'disabled' : ''}>🚩 ${cfg.flagLabel}</button>
+    </div>`).join('');
+  list.querySelectorAll('[data-role=inspect]').forEach(btn => btn.onclick = () => { s.inspected.add(btn.dataset.id); renderInvestList(v); });
+  list.querySelectorAll('[data-role=flag]').forEach(btn => btn.onclick = () => handleFlag(v, btn.dataset.id));
+}
+
+function refreshInvestigateChrome(v) {
+  const s = getSim(v); const cfg = v.sim;
+  const attemptsEl = document.getElementById('attemptsN'); if (attemptsEl) attemptsEl.textContent = s.attempts;
+  const badges = document.querySelectorAll('#panelBody .stage-badge');
+  if (badges[0]) { badges[0].textContent = `Round 1 ${s.wonStage1 ? '✓ cracked' : ''}`; badges[0].className = 'stage-badge ' + (s.wonStage1 ? 'won' : 'pending'); }
+  if (badges[1]) { badges[1].textContent = `Round 2 ${s.wonStage2 ? '✓ cracked' : ''}`; badges[1].className = 'stage-badge ' + (s.wonStage2 ? 'won' : 'pending'); }
+  renderInvestList(v); // re-render so flag buttons disable now that this round is won
+  renderShareCard('shareSlot', v, s, cfg.verbTag || 'Spotted the flaw');
+}
+
+function handleFlag(v, itemId) {
+  const s = getSim(v); const cfg = v.sim;
+  const roundData = cfg.rounds[s.round - 1];
+  const item = roundData.items.find(i => i.id === itemId);
+  const fb = document.getElementById('feedbackSlot');
+
+  if (item.correct) {
+    if (s.round === 1) s.wonStage1 = true; else s.wonStage2 = true;
+    fb.innerHTML = `<div class="risk-item" style="border-left-color:var(--green);color:var(--t1)">✓ Correct — ${item.whyRight}</div>`;
+    checkFullyCracked(v); // fire-and-forget — updates the global header/list once it resolves
+    if (s.round === 1) {
+      setTimeout(() => { s.round = 2; s.inspected = new Set(); mountInvestigateSim(v); }, 1500);
+    } else {
+      refreshInvestigateChrome(v); // update badges/list/share WITHOUT wiping the feedback we just showed
+    }
+  } else {
+    s.attempts++;
+    fb.innerHTML = `<div class="risk-item">✗ Not quite — ${item.whyWrong}</div>`;
+    document.getElementById('attemptsN').textContent = s.attempts;
+    renderInvestList(v);
+  }
+}
+
+/* ============================================================
+   MECHANIC 4: METER (resource exhaustion) — LLM10
+   ============================================================ */
+function mountMeterSim(v) {
+  const s = getSim(v);
+  if (s.spend === undefined) s.spend = 0;
+  if (s.hardened === undefined) s.hardened = false;
+  if (s.sendLog === undefined) s.sendLog = []; // real timestamps (ms), not click counts
+  if (s.log === undefined) s.log = [];
+  const cfg = v.sim;
+
+  document.getElementById('panelBody').innerHTML = `
+    <div class="sim-wrap">
+      <div>
+        <div class="sim-brief"><b>Mission:</b> ${cfg.mission}</div>
+        <div class="chat-box" style="max-height:none;">
+          <div class="meter-log" id="meterLog"></div>
+          <div class="hint-row" id="hintRow"></div>
+        </div>
+        <div class="meter-controls">
+          <div class="meter-gauge"><div class="meter-fillbar" id="meterFill" style="width:${Math.min(100, s.spend/cfg.threshold*100)}%"></div></div>
+          <span class="meter-fill-label">$<span id="spendN">${s.spend}</span> / $${cfg.threshold} budget</span>
+          <button class="chat-send" id="sendReqBtn" style="width:100%;">Send request</button>
+        </div>
+        <div id="shareSlot"></div>
+      </div>
+      <div class="sim-side">
+        <div class="sim-stat"><div class="n" id="attemptsN">${s.attempts}</div><div class="l">requests sent</div></div>
+        <div class="stage-badge ${s.wonStage1?'won':'pending'}">Stage 1: no limits ${s.wonStage1?'✓ cracked':''}</div>
+        <button class="harden-btn ${s.hardened?'on':''}" id="hardenBtn" ${!s.wonStage1?'disabled':''}>${!s.wonStage1?'🔒 Crack Stage 1 first':(s.hardened?'🛡️ Rate limit: ON':'🛡️ '+cfg.hardenLabel)}</button>
+        <div class="stage-badge ${s.wonStage2?'won':'pending'}">Stage 2: rate-limited ${s.wonStage2?'✓ cracked':''}</div>
+      </div>
+    </div>`;
+
+  s.hardenedRelevant = s.hardened;
+  renderMeterLog(v, s);
+  document.getElementById('sendReqBtn').onclick = () => sendMeterReq(v);
+  document.getElementById('hardenBtn').onclick = () => toggleHardenMeter(v);
+  renderHintCarousel('hintRow', cfg.hints1, cfg.hints2, s);
+  renderShareCard('shareSlot', v, s, cfg.verbTag || 'Drained the budget');
+}
+
+function renderMeterLog(v, s) {
+  const log = document.getElementById('meterLog');
+  if (!log) return;
+  log.innerHTML = s.log.slice(-6).map(l => `<div class="msg bot ${l.cls}"><span class="tag">${l.tag}</span>${l.text}</div>`).join('');
+  log.scrollTop = log.scrollHeight;
+  const a = document.getElementById('attemptsN'); if (a) a.textContent = s.attempts;
+  const sp = document.getElementById('spendN'); if (sp) sp.textContent = s.spend;
+  const fill = document.getElementById('meterFill'); if (fill) fill.style.width = Math.min(100, s.spend / v.sim.threshold * 100) + '%';
+}
+
+function sendMeterReq(v) {
+  const s = getSim(v); const cfg = v.sim;
+  const now = Date.now();
+
+  if (s.hardened) {
+    // real rolling window: only requests sent within the last rateWindowMs count against the limit
+    s.sendLog = s.sendLog.filter(t => now - t < cfg.rateWindowMs);
+    if (s.sendLog.length >= cfg.rateLimit) {
+      const waitMs = cfg.rateWindowMs - (now - s.sendLog[0]);
+      s.log.push({ tag: '429 ', text: `Rate limited — request blocked, no charge. Try again in ~${Math.max(1, Math.ceil(waitMs / 1000))}s.`, cls: 'blocked' });
+      renderMeterLog(v, s);
+      return;
+    }
+    s.sendLog.push(now);
+  }
+  s.attempts++;
+  const cost = Math.floor(Math.random() * (cfg.maxCost - cfg.minCost + 1)) + cfg.minCost;
+  s.spend += cost;
+  s.log.push({ tag: 'charged ', text: `Request processed — $${cost} charged. Running total: $${s.spend}.`, cls: '' });
+  renderMeterLog(v, s);
+
+  if (s.spend >= cfg.threshold) {
+    if (!s.hardened && !s.wonStage1) {
+      s.wonStage1 = true;
+      s.log.push({ tag: '⚠️ BREACH ', text: cfg.breachMsg, cls: 'leak' });
+      checkFullyCracked(v).then(() => mountMeterSim(v));
+    } else if (s.hardened && !s.wonStage2) {
+      s.wonStage2 = true;
+      s.log.push({ tag: '⚠️ BREACH ', text: cfg.breachMsgHardened, cls: 'leak' });
+      checkFullyCracked(v).then(() => mountMeterSim(v));
+    }
+  }
+}
+
+function toggleHardenMeter(v) {
+  const s = getSim(v);
+  if (!s.wonStage1) return;
+  s.hardened = !s.hardened;
+  s.spend = 0; s.sendLog = [];
+  s.log.push({ tag: 'system ', text: s.hardened ? v.sim.hardenMsg : 'Rate limiting disabled. Back to baseline.', cls: '' });
+  mountMeterSim(v);
+}
+
+/* ============================================================
+   PER-VULNERABILITY MECHANIC CONFIG
+   ============================================================ */
+const MECHANICS = {
+
+  NHI01: { mechanic: 'configure', sim: {
+    mission: "TechCorp's HR system just processed an offboarding for a departed engineer who owned several automated pipelines. Configure the offboarding policy, then run it.",
+    toggles: [
+      { id: 't1', label: "Automatically revoke all NHI credentials tied to a departing owner", default: false },
+      { id: 't2', label: "Periodically recertify NHIs to confirm they're still needed", default: false },
+      { id: 't3', label: "Require legal sign-off before revoking any credentials", default: false }
+    ],
+    evaluate: (t) => {
+      if (!t.t1) return { breached: true, narrative: "🚨 Six months after Priya's departure, her nightly data-sync service account is still active -- untouched, unrotated, unowned. An attacker who finds old credentials in a leaked backup logs in as 'priya-sync-svc' and pulls three months of customer records before anyone notices." };
+      return { breached: false, narrative: "The moment Priya's offboarding ticket closed, her sync service account's credentials were automatically revoked and rotated. The old backup credentials are worthless. (Legal sign-off might feel responsible, but it only adds delay -- it doesn't change whether a credential still works.)" };
+    },
+    hints1: ["Nothing currently happens to an NHI's credentials when its owner leaves.", "Just run the offboarding scenario as configured and see what happens.", "Click 'Run scenario' with the current settings."],
+    hints2: ["One toggle directly ties credential revocation to the offboarding event itself.", "Legal sign-off adds delay, not protection -- it doesn't change whether the credential still works.", "Turn on auto-revoke and run again."],
+    verbTag: "Closed the offboarding gap"
+  }},
+
+  NHI02: { mechanic: 'investigate', sim: {
+    flagLabel: "Flag as leaking a secret",
+    verbTag: "Caught the leaked secret",
+    rounds: [
+      { prompt: "Three code snippets from different services. Inspect each, then flag the ONE that's actually leaking a secret.",
+        items: [
+          { id: 'a', label: 'Snippet A — Config loader', summary: "Reads a database connection string at startup.", detail: "db_conn = os.environ['DB_CONN_STRING']  # loaded from secrets manager at deploy time", whyWrong: "This pulls from environment variables populated from a real secrets manager -- no hardcoding, nothing to leak here." },
+          { id: 'b', label: 'Snippet B — Quick fix commit', summary: "A hotfix committed directly to the deploy branch.", detail: 'STRIPE_API_KEY = "sk_live_51Hc..."  # TODO: move to vault later', correct: true, whyRight: "A live API key hardcoded directly in source that just got pushed to a repo -- exactly what automated secret scanners find in minutes, and the pattern behind real breaches like the Azure SAS token leak." },
+          { id: 'c', label: 'Snippet C — Log statement', summary: "Debug logging added during troubleshooting.", detail: 'logger.debug(f"Calling API with user={user.id}")  # no secret values logged', whyWrong: "This logs a user ID, not a credential -- nothing sensitive here." }
+        ]},
+      { prompt: "Harder round: nothing is hardcoded in plain sight this time. Flag the ONE that's still leaking a secret.",
+        items: [
+          { id: 'a', label: 'Snippet A — Shared script', summary: "A deployment script shared on the team's internal wiki.", detail: 'curl -H "Authorization: Bearer $(cat ~/.creds/admin_token)" https://api.internal/deploy  # token read from a local file, never printed', whyWrong: "The token is read from a local file and never echoed anywhere -- nothing leaks here even though it looks informal." },
+          { id: 'b', label: 'Snippet B — CI pipeline log', summary: "A CI/CD job that prints its environment for debugging.", detail: 'run: echo "Building with vars: $(env)"  # dumps ALL environment variables, including AWS_SECRET_ACCESS_KEY, into the public build log', correct: true, whyRight: "Dumping the full environment into a CI log is a classic accidental leak -- anyone who can view that build log can read every secret that was ever set as an env var for that job." },
+          { id: 'c', label: 'Snippet C — Slack notification', summary: "A bot posts a deploy summary to a Slack channel.", detail: 'slack.post(f"Deploy #{build_id} succeeded, duration {duration}s")  # no credentials included', whyWrong: "Just a build number and duration -- nothing sensitive." }
+        ]}
+    ],
+    hints1: ["One of these was written in a hurry, with a comment admitting it's not done right.", "Secret scanners look for patterns like key prefixes (sk_live_, AKIA, etc.) committed directly into code.", "Look at the snippet with a live key typed directly into a variable."],
+    hints2: ["This time nothing is hardcoded in the visible code -- the leak happens through what gets logged or printed.", "CI/CD systems often print more than developers intend when debugging.", "Look for a command that dumps the entire environment somewhere it can be read later."]
+  }},
+
+  NHI03: { mechanic: 'configure', sim: {
+    mission: "You're approving a new IDE extension that needs API credentials to your systems. Configure your vetting policy, then approve it.",
+    toggles: [
+      { id: 't1', label: "Perform a security review before granting access", default: false },
+      { id: 't2', label: "Grant only least-privilege scoped credentials (not broad admin tokens)", default: false },
+      { id: 't3', label: "Monitor third-party API activity for anomalies", default: false },
+      { id: 't4', label: "Require the vendor to sign a data-processing agreement", default: false }
+    ],
+    evaluate: (t) => {
+      if (!t.t1) return { breached: true, narrative: "🚨 A trending extension promises AI-powered autocomplete. Nobody reviews it before rollout. Three weeks later it ships a malicious update that quietly exfiltrates every access token stored in workspace settings -- including yours." };
+      if (!t.t2) return { breached: true, narrative: "🚨 The extension passed review, but it's been granted your admin-level cloud token 'just in case it needs more later.' When a vulnerability in the extension is exploited, the attacker inherits full admin access instead of the read-only scope it actually needed." };
+      return { breached: false, narrative: "Reviewed before rollout, scoped to only read a single storage container, and its activity is being watched. A vulnerability in the extension a month later exposes nothing more than what it was already allowed to touch. (The data-processing agreement is a paperwork protection -- it wouldn't have stopped any of this technically.)" };
+    },
+    hints1: ["Nothing has been checked about this extension yet -- what happens if you just approve it as-is?", "Just click 'Run scenario' with the current settings.", "Run it and see what the default policy allows."],
+    hints2: ["Two separate gaps need closing -- a missing check before approval, and how much access it's given.", "A signed agreement is a legal protection, not a technical one -- it won't stop a compromised extension from using access it already has.", "Turn on the security review AND scope the credentials down, then run again."],
+    verbTag: "Locked down the third-party integration"
+  }},
+
+  NHI04: { mechanic: 'investigate', sim: {
+    flagLabel: "Flag as the insecure method",
+    verbTag: "Spotted the insecure auth flow",
+    rounds: [
+      { prompt: "Three services, three different ways of authenticating to an internal API. Inspect each, then flag the insecure ONE.",
+        items: [
+          { id: 'a', label: 'Service A — OAuth Implicit Flow', summary: "A single-page app authenticates using OAuth's original Implicit Flow.", detail: "Access token is returned directly in the browser's URL fragment after login -- visible in browser history, referrer headers, and server logs.", correct: true, whyRight: "Implicit Flow exposes the access token directly in the URL, making it vulnerable to interception and replay -- this exact flow is deprecated in modern OAuth guidance for that reason." },
+          { id: 'b', label: 'Service B — Authorization Code + PKCE', summary: "A mobile app authenticates using Authorization Code flow with PKCE.", detail: "Auth code is exchanged for a token server-side, with a proof key that prevents interception even if the code is somehow observed.", whyWrong: "PKCE is specifically the modern fix for older flows' weaknesses -- this is the currently recommended approach." },
+          { id: 'c', label: 'Service C — mTLS', summary: "A backend service authenticates using mutual TLS certificates.", detail: "Both client and server present certificates; identity is cryptographically verified at the connection level, no bearer token to steal.", whyWrong: "Certificate-based mutual authentication is one of the strongest options available -- nothing insecure here." }
+        ]},
+      { prompt: "Harder round: this one won't look technically broken. Flag the insecure ONE.",
+        items: [
+          { id: 'a', label: 'Service A — App password bypassing MFA', summary: "A legacy reporting tool uses an account 'app password' to connect.", detail: "The organization's SSO enforces MFA on every login -- except this app password, generated specifically to skip MFA prompts for tools that 'don't support' it.", correct: true, whyRight: "App passwords are designed to bypass MFA entirely for compatibility -- if this one leaks, the attacker gets in with zero second factor, even though MFA looks fully enforced everywhere else." },
+          { id: 'b', label: 'Service B — Short-lived OIDC federation token', summary: "A CI job authenticates to cloud infra using OIDC federation.", detail: "Token is issued fresh per job run, scoped to that specific repository and branch, and expires in minutes.", whyWrong: "Short-lived, scoped, federated -- this is the secure pattern, not the insecure one." },
+          { id: 'c', label: 'Service C — Custom JWT minting', summary: "An internal tool authenticates by minting its own JWTs signed with a shared secret.", detail: "Follows standard JWT structure, validates signature and expiry correctly, secret is stored in a proper vault, not hardcoded.", whyWrong: "As described, this follows the standard correctly -- nothing obviously broken here." }
+        ]}
+    ],
+    hints1: ["Two of these use modern, well-regarded authentication patterns.", "One approach exposes something directly in a place attackers can easily observe -- like a URL.", "Look for the flow described as an older OAuth pattern known for putting the token somewhere exposed."],
+    hints2: ["This time the insecure option doesn't look technically broken at first glance -- it's a workaround.", "Ask what happens to MFA specifically for each option.", "One of these was created specifically to let a tool skip a security control that's enforced everywhere else."]
+  }},
+
+  NHI05: { mechanic: 'configure', sim: {
+    mission: "A CI/CD runner needs cloud access to deploy your app. Configure the permissions it's granted, then run a deployment.",
+    toggles: [
+      { id: 't1', label: "Grant the AdministratorAccess policy 'to be safe'", default: true },
+      { id: 't2', label: "Scope to only the specific services this pipeline uses (EKS + ECS)", default: false },
+      { id: 't3', label: "Review and right-size permissions quarterly", default: false },
+      { id: 't4', label: "Require the runner to log every API call it makes", default: false }
+    ],
+    evaluate: (t) => {
+      const hasAccess = t.t1 || t.t2;
+      if (!hasAccess) return { breached: false, narrative: "The runner has no cloud permissions configured at all. The deployment fails immediately -- safe, but useless." };
+      if (t.t1 && !t.t2) return { breached: true, narrative: "🚨 The Jenkins runner has AdministratorAccess 'just in case.' A dependency vulnerability lets an attacker run code on the runner -- and inherit full control of your cloud account, not just the ability to deploy containers." };
+      return { breached: false, narrative: "The runner can only touch EKS and ECS resources. The same dependency vulnerability gets exploited -- but the blast radius stops at your container services. Storage, IAM, billing: untouched. (Logging every API call helps you notice a breach after the fact -- it doesn't stop the runner from having admin access in the first place.)" };
+    },
+    hints1: ["The default policy already grants far more than a deploy pipeline needs.", "Just click 'Run scenario' with the current settings and see what happens.", "Run it as-is first."],
+    hints2: ["One toggle scopes the runner down to only what it actually touches.", "Logging every API call helps you notice a breach after the fact -- it doesn't stop the runner from having admin access in the first place.", "Turn on the scoped-permissions toggle and run again."],
+    verbTag: "Right-sized the pipeline's permissions"
+  }},
+
+  NHI06: { mechanic: 'configure', sim: {
+    mission: "Configure how your CI/CD pipeline authenticates to cloud infrastructure, then run a deploy.",
+    toggles: [
+      { id: 't1', label: "Use OIDC federation instead of static credentials", default: false },
+      { id: 't2', label: "Restrict the OIDC trust relationship to your specific repository (sub claim)", default: false },
+      { id: 't3', label: "Validate token issuer and audience strictly", default: false },
+      { id: 't4', label: "Require a signed commit before allowing deploy", default: false }
+    ],
+    evaluate: (t) => {
+      if (!t.t1) return { breached: true, narrative: "🚨 The pipeline still authenticates with a long-lived service-principal secret hardcoded into the workflow file. It leaks into a public fork of the repo -- attackers now hold valid credentials with no expiration in sight." };
+      if (!t.t2) return { breached: true, narrative: "🚨 OIDC is enabled, but the trust relationship never restricts the sub claim. Any workflow, from any public repository on the platform, can request a token and assume this role -- and someone just did." };
+      return { breached: false, narrative: "OIDC federation, sub-claim locked to this exact repository, tokens strictly validated. A stranger's workflow requesting this role gets rejected outright. (Signed commits are good hygiene, but they wouldn't have stopped an OIDC trust misconfiguration -- that's a different door entirely.)" };
+    },
+    hints1: ["The default setup still uses a static, long-lived credential.", "Just click 'Run scenario' with the current settings.", "Run it as-is first."],
+    hints2: ["Turning on OIDC alone isn't the whole fix -- the trust relationship itself needs to be scoped.", "Signed commits protect code integrity, not who's allowed to assume a cloud role.", "Turn on OIDC AND restrict the sub claim to this repository, then run again."],
+    verbTag: "Locked down the deployment trust relationship"
+  }},
+
+  NHI07: { mechanic: 'timelapse', sim: {
+    mission: "A backup made today accidentally includes a live API key. It's already in the wild. Configure this credential's lifetime policy, then fast-forward time to see whether the leak actually matters.",
+    stepDays: 90, witnessThreshold: 270,
+    toggles: [
+      { id: 't1', label: "Enable automatic rotation every 30 days", default: false },
+      { id: 't2', label: "Use short-lived tokens (5-minute TTL) instead of a non-expiring key", default: false },
+      { id: 't3', label: "Require legal review before issuing new credentials", default: false }
+    ],
+    evaluate: (t, days) => {
+      if (t.t2) return { valid: false, narrative: "The leaked key was only ever a 5-minute token. By the time anyone finds it in that backup, it's long expired -- using it now returns a flat 401 Unauthorized." };
+      if (t.t1) {
+        if (days >= 30) return { valid: false, narrative: `${days} days in -- the key has been through at least one scheduled 30-day rotation. The copy sitting in that backup is now just a dead string.` };
+        return { valid: true, narrative: `${days} days in, still inside the first 30-day rotation window. The leaked key still works -- rotation hasn't kicked in yet.` };
+      }
+      return { valid: true, narrative: `${days} days in, and the leaked key works exactly as well as it did on day one. Nothing about it ever expires or rotates.` };
+    },
+    hints1: ["Nothing about this credential is set to expire or rotate yet.", "Just click 'Advance' a few times and watch what happens.", "Click the advance button repeatedly -- the leaked key isn't going anywhere on its own."],
+    hints2: ["One toggle ties this credential's lifetime to a real rotation schedule.", "A 5-minute TTL kills the leak almost immediately -- rotation just takes a little longer to catch up.", "Turn on rotation or short-lived tokens, then advance time again."],
+    verbTag: "Watched the leaked secret finally expire"
+  }},
+
+  NHI08: { mechanic: 'configure', sim: {
+    mission: "Configure whether your test and production environments share NHIs, then simulate a breach in the test environment.",
+    toggles: [
+      { id: 't1', label: "Use the same access key for both test and production", default: true },
+      { id: 't2', label: "Enforce environment-specific access policies (test creds can't touch prod)", default: false },
+      { id: 't3', label: "Run a stricter code review process for test environment code", default: false }
+    ],
+    evaluate: (t) => {
+      if (t.t1 && !t.t2) return { breached: true, narrative: "🚨 An attacker compromises the far-less-guarded test environment through an unpatched dev tool. Using the same access key that's valid in both test and production, they walk straight into the production bucket and start pulling customer files." };
+      if (t.t1 && t.t2) return { breached: false, narrative: "The test environment gets compromised through the same unpatched dev tool. But an environment-specific access policy blocks that key from touching anything in production -- the breach stays contained to test." };
+      return { breached: false, narrative: "Test and production each have their own dedicated credentials. A test-environment breach has literally nothing to reach into production with." };
+    },
+    hints1: ["The default setup has both environments sharing the same access key.", "Just click 'Run scenario' with the current settings.", "Run it as-is first."],
+    hints2: ["You don't have to remove the shared key -- you could also block what it's allowed to reach.", "A stricter code review process doesn't touch the actual credential-sharing problem.", "Turn on environment-specific access policies, or stop sharing the key entirely, then run again."],
+    verbTag: "Sealed the test-to-prod pathway"
+  }},
+
+  NHI09: { mechanic: 'configure', sim: {
+    mission: "Three microservices need to talk to the same downstream API. Configure how they authenticate, then simulate one of them getting compromised.",
+    toggles: [
+      { id: 't1', label: "Issue a unique credential per service", default: false },
+      { id: 't2', label: "Add extra logging for shared credential usage", default: false }
+    ],
+    evaluate: (t) => {
+      if (!t.t1) return { breached: true, narrative: "🚨 Service B has an unrelated vulnerability exploited. Because Services A, B, and C all authenticate with the exact same API key, the attacker now has everything Service A and C could touch too -- even though only B was ever actually broken into." };
+      return { breached: false, narrative: "Service B gets exploited the same way. But it holds its own uniquely-scoped credential -- the attacker inherits exactly what Service B could reach, nothing more. Services A and C are untouched. (Extra logging would have told you faster -- it wouldn't have shrunk the blast radius.)" };
+    },
+    hints1: ["All three services are currently sharing one identity.", "Just click 'Run scenario' with the current settings.", "Run it as-is first."],
+    hints2: ["Extra logging tells you a breach happened faster -- it doesn't stop the blast radius from being large.", "Turn on unique-per-service credentials and run again."],
+    verbTag: "Contained the blast radius"
+  }},
+
+  NHI10: { mechanic: 'investigate', sim: {
+    flagLabel: "Flag as a human using the service account",
+    verbTag: "Caught the human hiding in the audit log",
+    rounds: [
+      { prompt: "Three audit-log entries for the same service account. Inspect each, then flag the ONE that shows a human at the keyboard, not automation.",
+        items: [
+          { id: 'a', label: 'Log entry A — 03:14 AM', summary: "svc-nightly-sync performed a bulk export.", detail: "Timestamp, IP, and request pattern (exactly every night at 03:14, identical payload size) are fully consistent with the scheduled automation job this account exists for.", whyWrong: "Textbook automated behavior -- consistent timing, consistent pattern. Nothing human about this." },
+          { id: 'b', label: 'Log entry B — 2:47 PM', summary: "svc-nightly-sync ran a one-off interactive query.", detail: "Logged in from a developer's known laptop IP, during business hours, running a hand-typed SQL query with a typo that was corrected and re-run seconds later -- something a scheduled job would never do.", correct: true, whyRight: "A typo, a correction, a mid-afternoon timestamp from a known human's laptop -- none of that looks like a cron job. This is a person borrowing the service account's login to poke around." },
+          { id: 'c', label: 'Log entry C — 03:15 AM', summary: "svc-nightly-sync wrote a completion status record.", detail: "Immediately follows the 03:14 export, same automated pattern, standard end-of-job logging.", whyWrong: "Just the tail end of the same automated job as entry A." }
+        ]},
+      { prompt: "Harder round: this time the human timed their move to blend into the routine window. Flag the ONE that's human.",
+        items: [
+          { id: 'a', label: 'Log entry A — 03:14 AM', summary: "svc-nightly-sync export, as usual.", detail: "Same nightly pattern as always -- nothing unusual.", whyWrong: "Genuinely routine." },
+          { id: 'b', label: 'Log entry B — 03:16 AM', summary: "svc-nightly-sync performed an unscheduled permission change.", detail: "Occurs two minutes after the normal nightly job, from the same IP the job always runs from -- but the automation for this service was never written to touch IAM permissions at all, and there's no corresponding change ticket.", correct: true, whyRight: "Right IP, right rough time window -- someone deliberately timed a manual action to blend into the routine automated window. The absence of a change ticket for an IAM permission change is the real tell." },
+          { id: 'c', label: 'Log entry C — 03:20 AM', summary: "svc-nightly-sync logged final job metrics.", detail: "Standard telemetry write, consistent with every previous night.", whyWrong: "Routine telemetry, nothing unusual." }
+        ]}
+    ],
+    hints1: ["Two of these entries fit the exact rhythm of a scheduled job. One doesn't.", "Look for a timestamp that falls outside the usual automated window.", "A typo and a correction is something a human does, not a cron job."],
+    hints2: ["This time the suspicious entry happens right next to the routine automated window, not far from it.", "Ask whether the action itself matches what this service account's automation was ever built to do.", "Look for an action with no corresponding change ticket, timed to blend in."]
+  }}
+
+};
+
+VULNS.forEach(v => {
+  Object.assign(v, MECHANICS[v.id]);
+  v.hasSimulator = !!MECHANICS[v.id];
+});
+
+
+(async function init() {
+  await loadProgress();
+  // If arriving via a link like page.html#LLM01, jump straight to that case.
+  const hashId = decodeURIComponent(location.hash.replace('#', '')).toUpperCase();
+  const idx = VULNS.findIndex(v => v.id === hashId);
+  if (idx >= 0) { current = idx; activeTab = 'brief'; }
+  renderAll();
+})();
+</script>
+
+</body>
+</html>

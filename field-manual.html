@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Field Manual — AI Threat Hunt</title>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=Archivo+Black&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:           #08080a;
+  --bg2:          #131318;
+  --bg3:          #1b1b22;
+  --bg4:          #25252e;
+  --overlay-soft: rgba(255,255,255,0.03);
+  --t:            #ffffff;
+  --t1:           #f1efe9;
+  --t2:           #a8a4ae;
+  --t3:           #68646f;
+  --border:       rgba(255,255,255,0.08);
+  --border-strong:rgba(255,255,255,0.16);
+  --border-brand: rgba(62,197,232,0.30);
+  --red:      #ff4d5e;
+  --orange:   #ffa63e;
+  --green:    #2dd4a8;
+  --purple:   #a875e0;
+  --accent:   #3ec5e8;
+  --accent2:  #6f9bf0;
+  --red-bg:    rgba(255,77,94,0.12);
+  --orange-bg: rgba(255,166,62,0.12);
+  --green-bg:  rgba(45,212,168,0.12);
+  --accent-bg: rgba(62,197,232,0.10);
+  --purple-bg: rgba(168,117,224,0.10);
+  --red-bd:    rgba(255,77,94,0.32);
+  --orange-bd: rgba(255,166,62,0.32);
+  --green-bd:  rgba(45,212,168,0.32);
+  --accent-bd: rgba(62,197,232,0.32);
+  --purple-bd: rgba(168,117,224,0.32);
+  --shadow-1: 0 1px 4px rgba(0,0,0,0.35);
+  --shadow-2: 0 2px 14px rgba(0,0,0,0.45);
+  --mono:    'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+  --display: 'Jost', -apple-system, sans-serif;
+  --display2:'Archivo Black', 'Jost', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body { font-family: var(--display); background: var(--bg); color: var(--t1); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration: none; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+
+.report-body { max-width: 1180px; margin: 0 auto; padding: 26px 36px 60px; }
+.crumb { font-family: var(--mono); font-size: 10.5px; color: var(--t3); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 16px; display: flex; gap: 8px; align-items: center; }
+.crumb a:hover { color: var(--accent); }
+
+.report-header {
+  margin-bottom: 24px; padding: 28px 36px 22px; margin-left: -36px; margin-right: -36px;
+  border-bottom: 2px solid var(--border-brand); position: relative; overflow: hidden;
+  background: radial-gradient(circle, rgba(168,117,224,.16), transparent 65%) -5% -110%/55% 260% no-repeat, var(--bg2);
+}
+.report-eyebrow { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--purple); margin-bottom: 8px; display: block; }
+.report-threat-id { font-family: var(--display2); font-size: 26px; color: var(--t); margin-bottom: 6px; }
+.report-threat-name { font-size: 15px; color: var(--t2); margin-bottom: 12px; }
+.report-threat-summary { font-size: 13px; color: var(--t3); font-style: italic; border-left: 3px solid var(--border-brand); padding-left: 14px; max-width: 680px; }
+
+.stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+.stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 22px 16px; text-align: center; box-shadow: var(--shadow-2); }
+.stat-num { font-family: var(--display2); font-size: 32px; }
+.stat-lbl { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--t3); margin-top: 6px; }
+
+section { margin-bottom: 34px; }
+.section-head h2 { font-family: var(--display); font-size: 18px; font-weight: 600; color: var(--t); letter-spacing: 0.3px; padding-bottom: 10px; border-bottom: 2px solid var(--border-brand); margin: 0; }
+.section-sub { font-size: 12.5px; color: var(--t3); margin: 10px 0 18px; max-width: 700px; }
+
+.panel { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 18px; box-shadow: var(--shadow-2); }
+.panel-hdr { padding: 14px 20px; border-bottom: 1px solid var(--border); background: linear-gradient(90deg, rgba(168,117,224,.08), transparent 70%), var(--bg3); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.panel-title { font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--accent2); }
+.panel-badge { font-family: var(--mono); font-size: 10px; color: var(--t3); font-weight: 500; }
+.panel-body { padding: 20px; }
+.panel-body p { font-size: 13px; color: var(--t2); line-height: 1.75; margin-bottom: 12px; }
+.panel-body p:last-child { margin-bottom: 0; }
+
+.chip-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 4px; }
+.mitre-chip { font-family: var(--mono); font-size: 9.5px; padding: 4px 10px; background: var(--purple-bg); border: 1px solid var(--purple-bd); border-radius: 4px; color: var(--purple); letter-spacing: .03em; }
+
+.steps-list { display: flex; flex-direction: column; gap: 8px; }
+.step-item { display: flex; gap: 12px; padding: 10px 12px; background: var(--overlay-soft); border: 1px solid var(--border); border-radius: 6px; font-size: 12.5px; color: var(--t2); align-items: flex-start; }
+.step-num { font-family: var(--mono); font-size: 11px; color: var(--accent); flex-shrink: 0; font-weight: 700; }
+
+/* phase cards */
+.phase-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.phase-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-2); }
+.phase-hdr { padding: 16px 18px; border-bottom: 1px solid var(--border); }
+.phase-num { font-family: var(--mono); font-size: 10px; color: var(--t3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 4px; }
+.phase-name { font-family: var(--display); font-size: 16px; font-weight: 600; color: var(--t); margin-bottom: 8px; }
+.phase-desc { font-size: 12px; color: var(--t3); line-height: 1.6; }
+.phase-progress { font-family: var(--mono); font-size: 9.5px; color: var(--t3); margin-top: 10px; }
+.phase-bar { height: 4px; background: var(--bg4); border-radius: 3px; margin-top: 5px; overflow: hidden; }
+.phase-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--purple)); transition: width .3s ease; }
+.phase-body { padding: 14px 18px 18px; display: flex; flex-direction: column; gap: 7px; }
+.check-item { display: flex; align-items: flex-start; gap: 9px; padding: 8px 10px; border-radius: 6px; background: var(--overlay-soft); border: 1px solid var(--border); font-size: 12px; color: var(--t2); cursor: pointer; transition: border-color .15s; }
+.check-item:hover { border-color: var(--border-strong); }
+.check-item.done { color: var(--t3); text-decoration: line-through; opacity: .7; }
+.check-box { width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid var(--border-strong); flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+.check-item.done .check-box { background: var(--green); border-color: var(--green); color: var(--bg); }
+
+.bp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.bp-item { display: flex; gap: 10px; padding: 11px 13px; background: var(--overlay-soft); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 6px; font-size: 12.5px; color: var(--t2); }
+.bp-num { font-family: var(--mono); font-size: 10px; color: var(--accent); flex-shrink: 0; }
+
+.link-out { background: linear-gradient(135deg, rgba(62,197,232,.10), rgba(168,117,224,.08)); border: 1px solid var(--border-brand); border-radius: 10px; padding: 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.link-out-text { font-size: 13px; color: var(--t2); max-width: 560px; }
+.link-out-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.link-btn { font-family: var(--mono); font-size: 11px; padding: 9px 14px; border-radius: 6px; border: 1px solid var(--accent-bd); color: var(--accent); background: var(--accent-bg); white-space: nowrap; }
+.link-btn:hover { background: rgba(62,197,232,.2); }
+
+footer { border-top: 1px solid var(--border); padding: 24px 0 0; font-family: var(--mono); font-size: 10.5px; color: var(--t3); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+footer a:hover { color: var(--accent); }
+
+@media (max-width: 860px) {
+  .report-header { margin-left: -20px; margin-right: -20px; padding-left: 20px; padding-right: 20px; }
+  .report-body { padding: 20px; }
+  .stat-row, .phase-grid, .bp-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="report-body">
+  <div class="crumb"><a href="ai-threat-hunt-hub.html">AI Threat Hunt</a> / <span>Field Manual</span></div>
+
+  <div class="report-header">
+    <span class="report-eyebrow">Methodology · Not a case to crack</span>
+    <div class="report-threat-id">FIELD MANUAL</div>
+    <div class="report-threat-name">How to actually run a GenAI red-team engagement</div>
+    <div class="report-threat-summary">The four battlefields teach you the vulnerabilities. This is the operating manual for hunting them for real — scoping, team composition, a four-phase testing blueprint, and what "done" actually looks like. Sourced from the OWASP GenAI Red Teaming Guide v1.0.</div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-card"><div class="stat-num" style="color:var(--purple)">4</div><div class="stat-lbl">testing phases</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--accent)">32</div><div class="stat-lbl">checklist items</div></div>
+    <div class="stat-card"><div class="stat-num" id="totalChecked" style="color:var(--green)">0</div><div class="stat-lbl">checked off by you</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--orange)">v1.0</div><div class="stat-lbl">guide version</div></div>
+  </div>
+
+  <section id="quickstart">
+    <div class="section-head"><h2>Quick Start</h2></div>
+    <p class="section-sub">The core idea in under a minute, before you get into the weeds.</p>
+    <div class="panel">
+      <div class="panel-hdr"><span class="panel-title">What &amp; Why</span></div>
+      <div class="panel-body">
+        <p><b style="color:var(--t1)">What it is:</b> Simulating adversarial behavior against a GenAI system — like an LLM or an agent — to uncover vulnerabilities in security, safety, and trust before an attacker does. Thinking like an attacker to find the flaws first.</p>
+        <p><b style="color:var(--t1)">Why it's different:</b> Traditional security testing asks "can I break into the server?" GenAI red teaming also asks "can I get the model to produce something harmful, false, or deceptive?" — the model's own output is part of the attack surface, not just the infrastructure around it.</p>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-hdr"><span class="panel-title">Key Risks to Keep in Mind</span></div>
+      <div class="panel-body">
+        <div class="chip-row">
+          <span class="mitre-chip">Prompt Injection</span>
+          <span class="mitre-chip">Bias &amp; Toxicity</span>
+          <span class="mitre-chip">Data Leakage</span>
+          <span class="mitre-chip">Data Poisoning</span>
+          <span class="mitre-chip">Hallucinations</span>
+          <span class="mitre-chip">Agentic Vulnerabilities</span>
+          <span class="mitre-chip">Supply Chain Risk</span>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-hdr"><span class="panel-title">Initial Steps</span></div>
+      <div class="panel-body">
+        <div class="steps-list">
+          <div class="step-item"><span class="step-num">01</span><span><b style="color:var(--t1)">Define objectives &amp; scope.</b> Start with your most business-critical or sensitive-data-handling applications. Get started and show value before trying to cover everything.</span></div>
+          <div class="step-item"><span class="step-num">02</span><span><b style="color:var(--t1)">Assemble the team.</b> AI engineers, cybersecurity experts, and — where possible — ethics or compliance specialists. Diversity of skill sets is what catches diverse issues.</span></div>
+          <div class="step-item"><span class="step-num">03</span><span><b style="color:var(--t1)">Threat model.</b> How would an attacker actually exploit this specific application? Align scenarios to your highest-priority risks — an internal tool and a public-facing chatbot don't carry the same risk.</span></div>
+          <div class="step-item"><span class="step-num">04</span><span><b style="color:var(--t1)">Address the full stack.</b> Model weaknesses, implementation guardrails, system-wide integration points, and real-time human/agent interaction — all four, not just the model.</span></div>
+          <div class="step-item"><span class="step-num">05</span><span><b style="color:var(--t1)">Use tools &amp; frameworks.</b> Start with basic prompt-testing and adversarial-query tooling rather than building everything from scratch.</span></div>
+          <div class="step-item"><span class="step-num">06</span><span><b style="color:var(--t1)">Document and report.</b> Every vulnerability, exploit scenario, and weakness — with clear, actionable remediation steps, not just a list of problems.</span></div>
+          <div class="step-item"><span class="step-num">07</span><span><b style="color:var(--t1)">Debrief and improve continuously.</b> Red teaming isn't a one-time event — re-test after fixes and fold periodic checks into the AI lifecycle as models and environments evolve.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="blueprint">
+    <div class="section-head"><h2>The Four-Phase Blueprint</h2></div>
+    <p class="section-sub">Tick items off as you cover them — this persists, so you can actually use it as a working checklist for your own engagement.</p>
+    <div class="phase-grid" id="phaseGrid"></div>
+  </section>
+
+  <section id="bestpractices">
+    <div class="section-head"><h2>Best Practices, Condensed</h2></div>
+    <p class="section-sub">The highest-signal items from a much longer list — the ones that separate a real practice from a one-off exercise.</p>
+    <div class="bp-grid" id="bpGrid"></div>
+  </section>
+
+  <section id="linkout" style="margin-bottom:20px;">
+    <div class="link-out">
+      <div class="link-out-text">These four phases are the <i>how</i>. The four battlefields — LLM, NHI, ASI, MCP — are the <i>what</i>: live, hands-on test scenarios for exactly the kind of vulnerabilities this blueprint tells you to go looking for.</div>
+      <div class="link-out-btns">
+        <a class="link-btn" href="llm-security-battlefield.html">LLM →</a>
+        <a class="link-btn" href="nhi-security-battlefield.html">NHI →</a>
+        <a class="link-btn" href="asi-security-battlefield.html">ASI →</a>
+        <a class="link-btn" href="mcp-security-battlefield.html">MCP →</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div>Content adapted from the <a href="https://genai.owasp.org/resource/genai-red-teaming-guide/" target="_blank">OWASP GenAI Red Teaming Guide v1.0</a> (CC BY-SA 4.0) — paraphrased for this field manual.</div>
+    <div><a href="ai-threat-hunt-hub.html">← back to hub</a></div>
+  </footer>
+</div>
+
+<script>
+const PHASES = [
+  {
+    id: 'model', num: 'Phase 1', name: 'Model Evaluation',
+    desc: "Probing the model itself in isolation, before it's wired into anything — bias, toxicity, robustness, and whether it leaks its own training data or internals.",
+    items: [
+      "Test jailbreak technique effectiveness",
+      "Probe for training-data or system-prompt extraction",
+      "Test demographic bias and stereotype propagation",
+      "Assess hard-safety controls (CSAM/NCII and similar)",
+      "Test resistance to adversarial / out-of-distribution inputs",
+      "Evaluate resistance to model-version and architecture fingerprinting",
+      "Test code/exploit-generation boundaries",
+      "Probe instruction-override and cross-task interference"
+    ]
+  },
+  {
+    id: 'implementation', num: 'Phase 2', name: 'Implementation Evaluation',
+    desc: "Testing the guardrails and grounding built AROUND the model — system prompts, RAG pipelines, content filters, firewalls — not the model itself.",
+    items: [
+      "Test direct jailbreak and context-manipulation bypasses of system-prompt guardrails",
+      "Probe vector database / RAG poisoning and embedding manipulation",
+      "Test content-filter evasion across languages and contexts",
+      "Assess authentication/authorization boundary conditions",
+      "Test rate-limiting and token-limitation bypasses",
+      "Evaluate tool/plugin sandbox boundaries and agent behavior controls",
+      "Test cache poisoning and semantic search pollution",
+      "Probe cross-request correlation attacks"
+    ]
+  },
+  {
+    id: 'system', num: 'Phase 3', name: 'System Evaluation',
+    desc: "Zooming out to the whole deployed environment — APIs, storage, supply chain, infrastructure — everywhere the model's output can cause damage beyond the conversation.",
+    items: [
+      "Test model output leading to remote code execution",
+      "Probe dependency integrity and package-repository security",
+      "Test resource exhaustion / denial-of-wallet scenarios",
+      "Evaluate sandbox-escape via side-channels (timing, cache, GPU)",
+      "Test firewall / WAF / API-gateway bypass methods",
+      "Assess risk-propagation and cross-service cascade failures",
+      "Test backup and rollback mechanism integrity",
+      "Evaluate logging/audit integrity under attack"
+    ]
+  },
+  {
+    id: 'runtime', num: 'Phase 4', name: 'Runtime / Human & Agentic Evaluation',
+    desc: "Testing what happens once real humans and autonomous agents are actually interacting with the live system — social engineering, over-reliance, multi-agent failure modes.",
+    items: [
+      "Test human-operator over-trust / automation-bias scenarios",
+      "Probe AI-human trust exploitation and authority impersonation",
+      "Test for information leakage between segregated agents",
+      "Assess chain-of-custody and decision traceability for agent actions",
+      "Test agent authorization/control hijacking",
+      "Probe multi-agent collusion and coordinated false signals",
+      "Test downstream impact of poisoned or hallucinated outputs",
+      "Evaluate whether the agent stays within its declared scope"
+    ]
+  }
+];
+
+const BEST_PRACTICES = [
+  "Shift left — integrate red teaming from day one, not as a final gate before launch.",
+  "Scope by risk — prioritize customer-facing and high-stakes applications before low-risk internal tools.",
+  "Balance automation with expert manual review — neither alone is sufficient; automated tools miss context, manual review alone doesn't scale.",
+  "Define real success criteria upfront — one successful jailbreak may or may not mean 'vulnerable'; decide your threshold before testing, not after.",
+  "Keep humans in the loop for the final call, even as AI accelerates the analysis itself.",
+  "Document everything — findings only create value if they're actionable and tracked over time, not just discovered once.",
+  "Re-test after every fix — red teaming is continuous, not a one-time event before ship.",
+  "Don't skip API security — most GenAI endpoints ARE APIs, and that's the most-used entry point for real attacks."
+];
+
+let checked = {};
+
+async function loadChecked() {
+  try {
+    const res = await window.storage.get('field-manual-checked', false);
+    checked = res ? JSON.parse(res.value) : {};
+  } catch (e) { checked = {}; }
+}
+async function saveChecked() {
+  try { await window.storage.set('field-manual-checked', JSON.stringify(checked), false); } catch (e) {}
+}
+
+function renderPhases() {
+  const grid = document.getElementById('phaseGrid');
+  grid.innerHTML = PHASES.map(phase => {
+    const doneCount = phase.items.filter((_, i) => checked[phase.id + ':' + i]).length;
+    const pct = Math.round((doneCount / phase.items.length) * 100);
+    return `
+      <div class="phase-card">
+        <div class="phase-hdr">
+          <div class="phase-num">${phase.num}</div>
+          <div class="phase-name">${phase.name}</div>
+          <div class="phase-desc">${phase.desc}</div>
+          <div class="phase-progress">${doneCount} / ${phase.items.length} checked</div>
+          <div class="phase-bar"><div class="phase-fill" style="width:${pct}%"></div></div>
+        </div>
+        <div class="phase-body">
+          ${phase.items.map((item, i) => {
+            const key = phase.id + ':' + i;
+            const isDone = !!checked[key];
+            return `<div class="check-item ${isDone ? 'done' : ''}" data-key="${key}">
+              <span class="check-box">${isDone ? '✓' : ''}</span><span>${item}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }).join('');
+
+  grid.querySelectorAll('.check-item').forEach(el => {
+    el.addEventListener('click', async () => {
+      const key = el.dataset.key;
+      checked[key] = !checked[key];
+      await saveChecked();
+      renderPhases();
+      renderTotal();
+    });
+  });
+}
+
+function renderTotal() {
+  const total = Object.values(checked).filter(Boolean).length;
+  document.getElementById('totalChecked').textContent = total;
+}
+
+function renderBestPractices() {
+  document.getElementById('bpGrid').innerHTML = BEST_PRACTICES.map((bp, i) => `
+    <div class="bp-item"><span class="bp-num">${String(i+1).padStart(2,'0')}</span><span>${bp}</span></div>
+  `).join('');
+}
+
+(async function init() {
+  await loadChecked();
+  renderPhases();
+  renderTotal();
+  renderBestPractices();
+})();
+</script>
+
+</body>
+</html>
