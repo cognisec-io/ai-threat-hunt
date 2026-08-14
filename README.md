@@ -38,7 +38,7 @@ Two stages, every time: break it under default (insecure) conditions, then break
 No build step, no server, no dependencies. Clone or download the repo, keep all files in the same folder, and open `ai-threat-hunt-hub.html` in a browser.
 
 ```bash
-git clone https://github.com/<your-org>/ai-threat-hunt.git
+git clone https://github.com/cognisec-io/ai-threat-hunt.git
 cd ai-threat-hunt
 open ai-threat-hunt-hub.html   # or just double-click it
 ```
