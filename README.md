@@ -7,9 +7,9 @@
 40 real vulnerabilities across four frameworks. One converging attack scenario. A methodology to run it for real.
 No login. No paywall. Fork the whole thing.
 
-Founding maintainer: **[cognisec.io](https://cognisec.io)** — *Intelligence Secures Tomorrow*
+![AI Threat Hunt demo](images/demo.gif)
 
-### 🌐 [**Access Live Environment**](https://ai-threat-hunt.vercel.app/)
+Founding maintainer: **[cognisec.io](https://cognisec.io)** — *Intelligence Secures Tomorrow*
 
 </div>
 
@@ -25,7 +25,7 @@ Two stages, every time: break it under default (insecure) conditions, then break
 
 | Module | What it is |
 |---|---|
-| 🏠 [**Hub**](./index.html) | Start here — links to everything below |
+| 🏠 [**Hub**](./ai-threat-hunt-hub.html) | Start here — links to everything below |
 | 🧩 [**LLM Security**](./llm-security-battlefield.html) | 10 cases — prompt injection, data leakage, output handling, and more |
 | 🔑 [**NHI Security**](./nhi-security-battlefield.html) | 10 cases — service accounts, secrets, credential lifecycle |
 | 🤖 [**Agentic Security (ASI)**](./asi-security-battlefield.html) | 10 cases — goal hijacking, tool misuse, rogue agents |
@@ -35,16 +35,12 @@ Two stages, every time: break it under default (insecure) conditions, then break
 
 ## Running it
 
-### Live Instance
-The fastest way to explore the project is via the hosted live environment:
-👉 **[ai-threat-hunt.vercel.app](https://ai-threat-hunt.vercel.app/)**
-
-No build step, no server, no dependencies. Clone or download the repo, keep all files in the same folder, and open `index.html` in a browser.
+No build step, no server, no dependencies. Clone or download the repo, keep all files in the same folder, and open `ai-threat-hunt-hub.html` in a browser.
 
 ```bash
 git clone https://github.com/<your-org>/ai-threat-hunt.git
 cd ai-threat-hunt
-open index.html   # or just double-click it
+open ai-threat-hunt-hub.html   # or just double-click it
 ```
 
 **One honest caveat:** progress tracking, hints, and checklist persistence use `window.storage`, an API provided by the Claude.ai artifact runtime. Outside that environment, every challenge, hint, and link still works identically — progress just won't survive a page reload. Swapping those calls for `localStorage` is a small, welcome contribution if you want a fully standalone build.
@@ -53,14 +49,17 @@ open index.html   # or just double-click it
 
 ```
 ai-threat-hunt/
-├── index.html          # entry point
+├── ai-threat-hunt-hub.html          # entry point
 ├── field-manual.html                # methodology + working checklists
 ├── ai-security-convergence.html     # the converged 10-step scenario
 ├── llm-security-battlefield.html    # LLM01–LLM10
 ├── nhi-security-battlefield.html    # NHI01–NHI10
 ├── asi-security-battlefield.html    # ASI01–ASI10
 ├── mcp-security-battlefield.html    # MCP01–MCP10
-└── README.md
+├── images/
+│   └── demo.gif                     # README demo
+├── README.md
+└── CONTRIBUTING.md
 ```
 
 ## Credits & sources
