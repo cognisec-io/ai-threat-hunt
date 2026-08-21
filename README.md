@@ -4,7 +4,7 @@
 
 **An open field manual for AI & agentic security — learn by breaking it, then fixing it.**
 
-40 real vulnerabilities across four frameworks. One converging attack scenario. A methodology to run it for real.
+50 real vulnerabilities across five frameworks. One converging attack scenario. A methodology to run it for real.
 No login. No paywall. Fork the whole thing.
 
 ![AI Threat Hunt demo](images/demo.gif)
@@ -30,7 +30,8 @@ Two stages, every time: break it under default (insecure) conditions, then break
 | 🔑 [**NHI Security**](./nhi-security-battlefield.html) | 10 cases — service accounts, secrets, credential lifecycle |
 | 🤖 [**Agentic Security (ASI)**](./asi-security-battlefield.html) | 10 cases — goal hijacking, tool misuse, rogue agents |
 | 🔌 [**MCP Security**](./mcp-security-battlefield.html) | 10 cases — tool poisoning, scope creep, shadow servers |
-| ⚡ [**AI Security: Convergence**](./ai-security-convergence.html) | The "boss battle" — one 10-step scenario where all four frameworks collide, with real RFC 8693 token-exchange claims at every hop |
+| 🧬 [**Agentic Skills Security**](./agentic-skills-security-battlefield.html) | 10 cases — malicious skills, supply-chain compromise, weak isolation, no governance |
+| ⚡ [**AI Security: Convergence**](./ai-security-convergence.html) | The "boss battle" — one 10-step scenario where all four core frameworks collide, with real RFC 8693 token-exchange claims at every hop |
 | 📖 [**Field Manual**](./field-manual.html) | Not a case to crack — the actual methodology for running a red-team engagement, with working checklists |
 
 ## Running it
@@ -56,6 +57,7 @@ ai-threat-hunt/
 ├── nhi-security-battlefield.html    # NHI01–NHI10
 ├── asi-security-battlefield.html    # ASI01–ASI10
 ├── mcp-security-battlefield.html    # MCP01–MCP10
+├── agentic-skills-security-battlefield.html  # AST01–AST10
 ├── images/
 │   └── demo.gif                     # README demo
 ├── README.md
@@ -72,9 +74,10 @@ This project is a teaching layer built on top of real, ongoing community researc
 | **NHI Security** | [OWASP Non-Human Identities Top 10](https://owasp.org/www-project-non-human-identities-top-10/) | Per OWASP project terms — verify current license on source |
 | **Agentic Security (ASI)** | [OWASP Top 10 for Agentic Applications, 2026](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) | Per OWASP project terms — verify current license on source |
 | **MCP Security** | [OWASP MCP Top 10 (beta)](https://owasp.org/www-project-mcp-top-10/) | **CC BY-NC-SA 4.0 — non-commercial** |
+| **Agentic Skills Security** | [OWASP Agentic Skills Top 10](https://github.com/OWASP/www-project-agentic-skills-top-10) (Aug 2026) | Per OWASP project terms — verify current license on source |
 | **Field Manual** | [OWASP GenAI Red Teaming Guide v1.0](https://genai.owasp.org/resource/genai-red-teaming-guide/) | CC BY-SA 4.0 |
 
-> **⚠️ License note:** the MCP Top 10 source is licensed **non-commercial** (CC BY-NC-SA 4.0), unlike the other sources here. All content in this project is paraphrased rather than reproduced, but if you're planning any commercial use of this repository, review that license directly before doing so — don't take our word for it. The NHI and Agentic Top 10 projects are newer, active, and their license terms should also be re-checked at the source before commercial reuse, since OWASP GenAI Security project terms have shifted before and may again.
+> **⚠️ License note:** the MCP Top 10 source is licensed **non-commercial** (CC BY-NC-SA 4.0), unlike the other sources here. All content in this project is paraphrased rather than reproduced, but if you're planning any commercial use of this repository, review that license directly before doing so — don't take our word for it. The NHI, Agentic, and Agentic Skills Top 10 projects are newer, active, and their license terms should also be re-checked at the source before commercial reuse, since OWASP GenAI Security project terms have shifted before and may again.
 
 Real-world breach and research references cited throughout the cases (EchoLeak, various CVEs, the OWASP GenAI Security project's incident write-ups, and others) belong to their original reporters and are cited, not reproduced.
 
